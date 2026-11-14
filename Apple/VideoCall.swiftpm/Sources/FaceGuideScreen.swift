@@ -17,6 +17,7 @@ struct FaceCameraView: View {
                     Spacer()
                     VStack(spacing: 3) {
                         Text("Tu identidad").font(.headline)
+                        AppVersionBadge()
                         Text("Paso \(min(feedback.accepted + 1, feedback.total)) de \(feedback.total)")
                             .font(.caption).foregroundStyle(.white.opacity(0.6))
                     }

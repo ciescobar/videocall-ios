@@ -43,6 +43,7 @@ struct RootView: View {
             VStack(spacing: 25) {
                 Image(systemName: "video.bubble.fill").font(.system(size: 72)).foregroundStyle(mint)
                 Text("VideoCall").font(.system(size: 40, weight: .bold, design: .rounded))
+                AppVersionBadge()
                 Text("Más cerca, estés donde estés").font(.title3).foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 16) {
                     Label("Audio y video con Android", systemImage: "person.2.fill")
@@ -65,7 +66,11 @@ struct RootView: View {
                 Section {
                     HStack(spacing: 15) {
                         Image(systemName: "person.crop.circle.fill").font(.largeTitle).foregroundStyle(mint)
-                        VStack(alignment: .leading) { Text(state.profile?.name ?? "Mi perfil").font(.headline); Text(state.status).font(.caption).foregroundStyle(state.online ? mint : .secondary) }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(state.profile?.name ?? "Mi perfil").font(.headline)
+                            Text(state.status).font(.caption).foregroundStyle(state.online ? mint : .secondary)
+                            AppVersionBadge()
+                        }
                     }.padding(.vertical, 8)
                 }
                 Section("Dispositivos disponibles · \(state.devices.count)") {
@@ -107,6 +112,9 @@ struct RootView: View {
     private var settingsView: some View {
         NavigationStack {
             Form {
+                Section("Acerca de VideoCall") {
+                    Text(AppVersion.label).textSelection(.enabled)
+                }
                 Section("Validación") {
                     Text(state.diagnostics).font(.footnote).textSelection(.enabled)
                     Button("Comprobar modelo facial") { state.testModel() }.disabled(state.call != nil || state.faceRequest != nil)
@@ -220,6 +228,7 @@ struct FaceFlowView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         Image(systemName: "faceid").font(.system(size: 65)).foregroundStyle(mint)
                         Text("Tu rostro, tu perfil").font(.largeTitle.bold())
+                        AppVersionBadge()
                         Text("Tomaremos cinco muestras: frente, un giro leve a cada lado, arriba y abajo. No necesitas mostrar el perfil completo.").font(.title3)
                         TextField("Tu nombre en las llamadas", text: $name).textContentType(.name).textFieldStyle(.roundedBorder)
                         Label("Buena luz de frente; ojos, nariz y boca visibles. Mantén el iPad quieto y a la altura de los ojos.", systemImage: "sun.max.fill")
