@@ -3,22 +3,6 @@ import AVFoundation
 import Vision
 import CoreImage
 
-enum FacePose: Int, CaseIterable {
-    case front, left, right, up, down
-    var title: String { ["Mira de frente", "Gira suavemente hacia un lado", "Gira hacia el otro lado", "Mira un poco arriba", "Mira un poco abajo"][rawValue] }
-    var symbol: String { ["face.smiling", "arrow.turn.up.left", "arrow.turn.up.right", "arrow.up", "arrow.down"][rawValue] }
-    func accepts(yaw: Double, pitch: Double, roll: Double) -> Bool {
-        guard abs(roll) <= 22 else { return false }
-        switch self {
-        case .front: return abs(yaw) < 12 && abs(pitch) < 12
-        case .left: return yaw > 6 && yaw < 32 && abs(pitch) < 22
-        case .right: return yaw < -6 && yaw > -32 && abs(pitch) < 22
-        case .up: return pitch > 6 && pitch < 27 && abs(yaw) < 20
-        case .down: return pitch < -6 && pitch > -27 && abs(yaw) < 20
-        }
-    }
-}
-
 struct FaceFeedback {
     var text = "Preparando cámara y modelo…"
     var score = 0
@@ -26,6 +10,15 @@ struct FaceFeedback {
     var total = 5
     var pose: FacePose = .front
     var good = false
+    var hold = 0.0
+    var seen = false
+    var centered = false
+    var distance = false
+    var imageGood = false
+    var faceRect = CGRect.zero
+    var imageAspect: CGFloat = 0.75
+    var observedAt = 0.0
+    var capturedAt = 0.0
     var flash = false
     var fatal = false
     var yaw: Double = 0
@@ -34,7 +27,7 @@ struct FaceFeedback {
 
 final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var feedback = FaceFeedback()
-    @Published var mirrored = UserDefaults.standard.object(forKey: "faceMirror") as? Bool ?? false
+    @Published var mirrored = UserDefaults.standard.object(forKey: "faceMirror011") as? Bool ?? true
     @Published var sound = UserDefaults.standard.object(forKey: "faceSound") as? Bool ?? true
     let session = AVCaptureSession()
     private let queue = DispatchQueue(label: "VideoCall.Face")
@@ -51,17 +44,15 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private var steps: [FacePose]
     private var samples = [[Float]]()
     private var lastTime: TimeInterval = 0
-    private var deadline = Date.timeIntervalSinceReferenceDate + 180
-    private var stableSince: TimeInterval = 0
-    private var stableFrames = 0
-    private var previousGood: TimeInterval = 0
+    private var deadline = ProcessInfo.processInfo.systemUptime + 180
+    private var stability = FaceStability()
+    private var capturedAt = 0.0
     private var pauseUntil: TimeInterval = 0
     private var stickyUntil: TimeInterval = 0
     private var stickyText = ""
     private var previousPose: FacePose?
     private var previousYaw: Double = 0
     private var previousPitch: Double = 0
-    private var motionDone = false
     private var failures = 0
     private var player: AVAudioPlayer?
 
@@ -81,7 +72,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             self.queue.async {
                 guard !self.stopped else { return }
                 guard granted else { self.publishError("Permite la cámara en Ajustes para registrar o verificar tu rostro."); return }
-                do { self.model = try FaceModel(); try self.configure(); self.session.startRunning() }
+                do { self.model = try FaceModel(); try self.configure(); self.deadline = ProcessInfo.processInfo.systemUptime + 180; self.session.startRunning() }
                 catch { self.publishError(error.localizedDescription) }
             }
         }
@@ -91,12 +82,12 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         stopped = true; if session.isRunning { session.stopRunning() }
         output?.setSampleBufferDelegate(nil, queue: nil); model = nil; samples.removeAll()
     }
-    func toggleMirror() { mirrored.toggle(); UserDefaults.standard.set(mirrored, forKey: "faceMirror") }
+    func toggleMirror() { mirrored.toggle(); UserDefaults.standard.set(mirrored, forKey: "faceMirror011") }
     func toggleSound() { sound.toggle(); UserDefaults.standard.set(sound, forKey: "faceSound") }
     func orient(_ value: AVCaptureVideoOrientation) {
         queue.async {
             guard self.orientation != value else { return }
-            self.orientation = value; self.stableFrames = 0; self.stableSince = 0
+            self.orientation = value; self.stability.reset()
             if let link = self.output?.connection(with: .video), link.isVideoOrientationSupported { link.videoOrientation = value }
         }
     }
@@ -120,38 +111,22 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private func publish(_ value: FaceFeedback) { onMain { [weak self] in guard let self = self, self.active else { return }; self.feedback = value } }
     private func publishError(_ value: String) { var f = FaceFeedback(); f.text = value; f.fatal = true; publish(f) }
     private func moved(_ yaw: Double, _ pitch: Double) -> Bool {
-        guard let previous = previousPose else { return true }
-        if motionDone { return true }
-        let pose = steps[samples.count]
-        let enough: Bool
-        switch pose {
-        case .left: enough = yaw - previousYaw >= 4
-        case .right: enough = previousYaw - yaw >= 4
-        case .up: enough = pitch - previousPitch >= 4
-        case .down: enough = previousPitch - pitch >= 4
-        case .front:
-            switch previous {
-            case .left: enough = previousYaw - yaw >= 4
-            case .right: enough = yaw - previousYaw >= 4
-            case .up: enough = previousPitch - pitch >= 4
-            case .down: enough = pitch - previousPitch >= 4
-            case .front: enough = false
-            }
-        }
-        motionDone = enough; return enough
+        steps[samples.count].moved(from: previousPose, yaw: yaw, pitch: pitch,
+            previousYaw: previousYaw, previousPitch: previousPitch)
     }
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        let now = Date.timeIntervalSinceReferenceDate
-        guard !stopped, now - lastTime >= 0.18, now >= pauseUntil, samples.count < steps.count else { return }; lastTime = now
+        let now = ProcessInfo.processInfo.systemUptime
+        guard !stopped, now - lastTime >= 0.10, now >= pauseUntil, samples.count < steps.count else { return }; lastTime = now
         if now > deadline { publishError("Se agotó el tiempo. Cancela y vuelve a intentarlo con buena luz."); shutdown(); return }
         guard let buffer = CMSampleBufferGetImageBuffer(sampleBuffer),
               let image = ci.createCGImage(CIImage(cvPixelBuffer: buffer), from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(buffer), height: CVPixelBufferGetHeight(buffer))) else { return }
         var f = FaceFeedback(); f.pose = steps[samples.count]; f.accepted = samples.count; f.total = steps.count
+        f.imageAspect = CGFloat(image.width) / CGFloat(image.height); f.capturedAt = capturedAt
         do {
             let request = VNDetectFaceLandmarksRequest()
             try VNImageRequestHandler(cgImage: image, orientation: .up, options: [:]).perform([request])
             guard let faces = request.results, faces.count == 1, let face = faces.first else {
-                stableFrames = 0; stableSince = 0; f.text = "Muestra un solo rostro, completo y con buena luz."; publish(f); return
+                stability.reset(); f.text = "Muestra un solo rostro, completo y con buena luz."; publish(f); return
             }
             let yaw = (face.yaw?.doubleValue ?? 999) * 180 / .pi
             let pitch = (face.pitch?.doubleValue ?? 999) * 180 / .pi
@@ -161,28 +136,31 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             let rect = CGRect(x: face.boundingBox.minX * w, y: (1 - face.boundingBox.maxY) * h,
                 width: face.boundingBox.width * w, height: face.boundingBox.height * h)
             let dx = abs(rect.midX - w / 2) / side, dy = abs(rect.midY - h / 2) / side, size = rect.width / side
-            let centerScore = max(0, 1 - max(dx / 0.25, dy / 0.28))
-            let sizeScore = max(0, 1 - abs(size - 0.62) / 0.35)
-            f.score = Int(min(100, max(0, (0.65 * centerScore + 0.35 * sizeScore) * 100)))
+            let framing = FaceFraming.evaluate(left: Double(rect.minX), top: Double(rect.minY),
+                right: Double(rect.maxX), bottom: Double(rect.maxY), width: Double(w), height: Double(h))
+            f.score = framing.score; f.centered = framing.centered && framing.inside
+            f.distance = framing.distance && rect.width >= 120 && rect.height >= 120
+            f.seen = true; f.observedAt = now
+            f.faceRect = CGRect(x: rect.minX / w, y: rect.minY / h, width: rect.width / w, height: rect.height / h)
             var hint: String?
             if rect.width < 120 || rect.height < 120 || size < 0.35 { hint = "Acércate un poco." }
             else if size > 0.88 || rect.width > w * 0.94 || rect.height > h * 0.95 { hint = "Aléjate un poco." }
             else if dx > 0.25 || dy > 0.28 || rect.minX < 4 || rect.minY < 4 || rect.maxX > w - 4 || rect.maxY > h - 4 { hint = "Centra todo el rostro en la vista." }
             else { hint = quality(buffer, rect: rect) }
+            f.imageGood = hint == nil
             if hint == nil && !f.pose.accepts(yaw: yaw, pitch: pitch, roll: roll) { hint = abs(roll) > 22 ? "Mantén la cabeza vertical." : f.pose.title + ". Basta un giro leve." }
             if hint == nil && !moved(yaw, pitch) { hint = "Mueve un poco la cabeza hacia la nueva posición." }
             if let hint = hint {
-                stableFrames = 0; stableSince = 0; f.text = now < stickyUntil ? stickyText : hint; publish(f); return
+                stability.reset(); f.text = now < stickyUntil ? stickyText : hint; publish(f); return
             }
             f.good = true; f.text = "Vas bien · mantén la posición un instante"
-            if previousGood == 0 || now - previousGood >= 1.2 || stableFrames == 0 { stableSince = now; stableFrames = 0 }
-            previousGood = now; stableFrames += 1
-            guard stableFrames >= 2, now - stableSince >= 0.35 else { publish(f); return }
+            let ready = stability.observe(at: now, good: true); f.hold = stability.progress
+            guard ready else { publish(f); return }
             guard let model = model else { return }
             let vector = try model.extract(image, face: face)
             if let profile = profile {
                 guard FaceMath.matches(vector, profile.samples) else {
-                    failures += 1; stableFrames = 0; stableSince = 0
+                    failures += 1; stability.reset()
                     if failures >= 3 {
                         UserDefaults.standard.set(Date().timeIntervalSince1970 + 30, forKey: "faceCooldown")
                         publishError("No coincide con el registro. Espera 30 segundos antes de repetir."); shutdown(); return
@@ -191,12 +169,12 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                     stickyUntil = now + 2.2; f.text = stickyText; f.good = false; pauseUntil = now + 0.45; publish(f); return
                 }
             } else if let first = samples.first, FaceMath.cosine(first, vector) < 0.42 {
-                stableFrames = 0; stableSince = 0; stickyText = "Gira menos: repetiremos solo esta posición."
+                stability.reset(); stickyText = "Gira menos: repetiremos solo esta posición."
                 stickyUntil = now + 2.2; f.text = stickyText; f.good = false; publish(f); return
             }
-            samples.append(vector); previousPose = f.pose; previousYaw = yaw; previousPitch = pitch; motionDone = false
-            stableFrames = 0; stableSince = 0; pauseUntil = now + 0.45; deadline = now + (profile == nil ? 180 : 90)
-            f.accepted = samples.count; f.flash = true; f.text = "¡Captura lista!"; publish(f); beep()
+            samples.append(vector); previousPose = f.pose; previousYaw = yaw; previousPitch = pitch
+            stability.reset(); pauseUntil = now + 0.45; deadline = now + (profile == nil ? 180 : 90)
+            capturedAt = now; f.capturedAt = now; f.hold = 0; f.accepted = samples.count; f.flash = true; f.text = "¡Captura lista!"; publish(f); beep()
             if samples.count == steps.count {
                 let result = profile ?? FaceProfile(version: 1, name: name, samples: samples)
                 do { if profile == nil { try FaceStore.save(result) } }
@@ -207,7 +185,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                 }
             }
         } catch {
-            stableFrames = 0; stableSince = 0; f.text = error.localizedDescription; f.good = false; publish(f)
+            stability.reset(); f.text = error.localizedDescription; f.good = false; publish(f)
         }
     }
     private func quality(_ buffer: CVPixelBuffer, rect: CGRect) -> String? {

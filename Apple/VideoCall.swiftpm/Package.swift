@@ -8,7 +8,7 @@ let package = Package(
     products: [.iOSApplication(
         name: "VideoCall", targets: ["AppModule"],
         bundleIdentifier: "com.mitech.videocall.applelab",
-        displayVersion: "0.1.0", bundleVersion: "1",
+        displayVersion: "0.1.1", bundleVersion: "2",
         appIcon: .placeholder(icon: .camera), accentColor: .presetColor(.green),
         supportedDeviceFamilies: [.pad, .phone],
         supportedInterfaceOrientations: [.portrait, .landscapeRight, .landscapeLeft,
