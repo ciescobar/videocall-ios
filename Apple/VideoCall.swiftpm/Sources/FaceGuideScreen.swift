@@ -68,7 +68,6 @@ struct FaceCameraView: View {
             Text(feedback.text).font(.subheadline.weight(.medium))
                 .foregroundStyle(feedback.fatal ? .orange : feedback.good ? faceMint : .white.opacity(0.8))
                 .multilineTextAlignment(.center).frame(minHeight: 40)
-                .accessibilityLiveRegion(.polite)
             HStack(spacing: 8) {
                 check("Centro", good: feedback.centered)
                 check("Distancia", good: feedback.distance)

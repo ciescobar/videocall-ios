@@ -141,7 +141,7 @@ struct ActiveCallView: View {
     @ObservedObject var media: CallMedia
     @EnvironmentObject var state: AppState
     @State private var ownMain = false
-    @State private var mirrored = false
+    @AppStorage("callMirror011") private var mirrored = true
     @State private var fill = false
     @State private var showStats = false
     @State private var pip = CGSize.zero
