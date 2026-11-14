@@ -1,0 +1,38 @@
+name: Comprobar VideoCall iOS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar XcodeGen
+        run: brew install xcodegen
+      - name: Generar proyecto
+        working-directory: Apple
+        run: xcodegen generate --spec project.yml
+      - name: Resolver bibliotecas
+        working-directory: Apple
+        run: xcodebuild -resolvePackageDependencies -project VideoCall.xcodeproj -scheme VideoCall
+      - name: Compilar para iPad sin firma
+        working-directory: Apple
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild -project VideoCall.xcodeproj -scheme VideoCall -configuration Debug -destination 'generic/platform=iOS' -derivedDataPath ../build-ios CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build-device.log
+      - name: Guardar informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Informe-iOS
+          path: Apple/*.log
+          retention-days: 7
+      - name: Guardar app sin firma (no instalable)
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoCall-iOS-sin-firma
+          path: build-ios/Build/Products/Debug-iphoneos/VideoCall.app
+          retention-days: 7

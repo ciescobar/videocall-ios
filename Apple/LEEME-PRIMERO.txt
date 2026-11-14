@@ -1,0 +1,119 @@
+VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.0
+14 de noviembre de 2026
+
+ESTADO REAL
+Se preparó el código nativo para llamadas con Android y registro facial completo.
+No hay todavía una app Apple compilada, firmada o instalada. No se han probado
+llamadas ni capturas en un iPad. El APK Android anterior permanece intacto.
+
+IMPORTANTE SOBRE SWIFT PLAYGROUND
+El paquete VideoCall.swiftpm contiene dependencias nativas binarias: WebRTC y
+ONNX Runtime. Hay limitaciones documentadas de Swift Playground con este tipo
+de dependencias y no se ha confirmado su compatibilidad en la versión del iPad.
+Por tanto, NO se presenta como una solución verificada de abrir y pulsar Ejecutar.
+Abrirlo en el iPad es una comprobación opcional. Si rechaza BinaryTarget o no
+resuelve las bibliotecas, no es un error del usuario y no conviene reintentarlo.
+El proyecto Xcode de esta misma carpeta es la alternativa para compilar en nube.
+
+QUÉ CONTIENE
+- Cinco capturas guiadas: frente, dos giros leves, arriba y abajo.
+- Nombre y consentimiento antes del registro; cámara frontal obligatoria.
+- Guía animada, progreso de encuadre, estabilidad, pitido y cambio de espejo.
+- Modelo SFace idéntico al archivo de Android; comparación local de 128 valores.
+- Plantilla cifrada con AES-GCM y clave en Keychain, solo para este dispositivo.
+  No se guardan fotos ni se envían plantillas al broker.
+- Verificación al entrar y antes de contestar (también llamadas solo de audio).
+- Conexión automática al mismo grupo público de prueba que Android 0.3.2.
+- Descubrimiento, aceptar/rechazar/colgar, tiempos de espera y deduplicación.
+- Audio/video WebRTC, micrófono, altavoz, cámara frontal/trasera, intercambio de
+  video grande/pequeño, vista propia con espejo opcional, estadísticas ICE.
+- Opción de forzar TURN en Ajustes para comprobar el servicio público.
+- Al ir a segundo plano: termina llamada, libera cámara y audio, desconecta.
+  Para volver a conectarse pide otra verificación facial. No hay llamadas push.
+
+REGISTRO FACIAL: ALCANCE
+Es una comprobación experimental, no una autenticación certificada. El movimiento
+guiado no constituye detección certificada de fotografías, pantallas o videos.
+La persona registra su perfil por sí misma: no se acredita legalmente su nombre.
+La verificación local tampoco constituye una prueba firmada de identidad ante el
+otro celular. No se deben tomar decisiones sensibles basándose solo en ella.
+El iPad Air M3 tiene Touch ID; este proyecto NO utiliza Face ID/TrueDepth.
+Los umbrales 0.42 de coherencia y 0.50/0.48 de verificación se conservan de Android,
+pero Vision y ML Kit detectan puntos de manera diferente y necesitan validación.
+
+COMPILAR DESDE WINDOWS CON UN MAC EN LA NUBE
+No es necesario instalar Swift ni Xcode en Windows. Se necesita una cuenta del
+servicio de compilación y un repositorio de código. El ZIP ya contiene una carpeta
+Apple, .github/workflows/ios.yml y codemagic.yaml en la raíz.
+
+Opción GitHub Actions:
+1. Crear o elegir un repositorio. Mantenerlo privado si no se quiere publicar código.
+2. Subir el CONTENIDO del ZIP conservando Apple y .github en la raíz del repositorio.
+3. En Actions, elegir 'Comprobar VideoCall iOS' y 'Run workflow'. Solo se ejecuta a
+   petición: no hay ejecuciones automáticas por cada edición.
+4. Descargar 'Informe-iOS'. Si falla, compartir el informe sin claves personales.
+5. El resultado sin firma NO se puede instalar directamente en iPad/iPhone.
+
+Opción Codemagic:
+1. Conectar el repositorio a la cuenta personal de Codemagic.
+2. Elegir codemagic.yaml y el flujo ios-compile-check.
+3. Compilar y descargar el informe. No se publican ni envían apps automáticamente.
+
+Ambos flujos generan el proyecto con XcodeGen y comprueban la compilación para un
+iPad real con la firma desactivada. Esto verifica código y enlace, NO instalación.
+Los límites gratuitos pueden cambiar; comprobarlos antes de activar facturación.
+Para obtener una app firmada instalable con Codemagic o distribuir por TestFlight
+se requiere la cuenta Apple Developer correspondiente. No se han pedido claves,
+pagado servicios, creado repositorios ni subido este proyecto a ningún servicio.
+
+EN UN MAC CON XCODE
+Con XcodeGen instalado, abrir Terminal dentro de Apple y ejecutar:
+    xcodegen generate --spec project.yml
+Abrir VideoCall.xcodeproj. Seleccionar equipo Apple, identificador y dispositivo.
+El paquete SwiftPM no se usa para generar el proyecto Xcode: ambos comparten fuentes.
+
+PRIMERA PRUEBA FÍSICA (DESPUÉS DE COMPILAR E INSTALAR)
+1. Abrir Android 0.3.2 y VideoCall Apple con internet y nombres diferentes.
+2. Autorizar cámara, aceptar consentimiento y completar las cinco posiciones.
+   Un giro LEVE es suficiente. El encuadre no necesita llegar a 100.
+3. Probar primero misma Wi-Fi, audio y video en ambos sentidos. Rechazar, cancelar,
+   colgar durante la verificación y negar permisos. Una cancelación nunca contesta.
+4. Cambiar cámara, silenciar, cambiar altavoz, tocar video pequeño e intercambiar.
+5. Repetir con Android por datos y iPad por Wi-Fi. Revisar estadísticas de ICE.
+6. Repetir con TURN forzado. Solo confirmar TURN si estadísticas muestran relay.
+   La disponibilidad y autenticación del TURN público NO están comprobadas.
+7. Salir de la app: comprobar que se apaga cámara/micrófono y deja de aparecer.
+8. Probar verificación con el titular y con otra persona que acepte participar.
+   Registrar falsos rechazos/aceptaciones, luz y postura; no publicar fotografías.
+
+PRIVACIDAD Y SERVICIOS
+El grupo de validación es público y no requiere configurar MQTT. Las instalaciones
+participantes pueden ver sus nombres. El secreto compartido incorporado no ofrece
+privacidad frente a quien tenga la app. El broker es un servicio público de pruebas.
+Las redes móviles, firewalls y TURN pueden impedir medios aunque aparezca el equipo.
+
+VALIDACIÓN EN WINDOWS
+Sintaxis Swift revisada con un parser, sin compilación ni comprobación de tipos Apple.
+Compatibilidad criptográfica contrastada con el RoomCrypto Java REAL de Android.
+Modelo y archivo oficial Microsoft comprobados por SHA256. Binarios iOS originales
+sin cambios; se añadió únicamente un module.modulemap C y se excluyó la variante Mac.
+Ver VALIDACION-IPAD.txt y CONTENIDO-SHA256.json.
+
+FUENTES Y LICENCIAS
+Apple Swift Playground: https://developer.apple.com/documentation/swift-playgrounds/
+Apple paquetes binarios: https://developer.apple.com/documentation/xcode/distributing-binary-frameworks-as-swift-packages
+Restricciones reportadas: https://developer.apple.com/forums/topics/developer-tools-and-services/developer-tools-and-services-swift-playground
+WebRTC distribución: https://github.com/stasel/WebRTC/tree/154.0.0
+ONNX Runtime oficial: https://github.com/microsoft/onnxruntime-swift-package-manager/tree/1.24.2
+SFace: https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface
+Mosquitto: https://test.mosquitto.org/
+Open Relay: https://www.metered.ca/tools/openrelay/
+XcodeGen: https://github.com/yonaskolb/XcodeGen
+GitHub Actions: https://docs.github.com/en/actions/concepts/billing-and-usage
+Codemagic: https://docs.codemagic.io/billing/pricing/
+Firma iOS: https://docs.codemagic.io/yaml-quick-start/building-a-native-ios-app/
+Apple Developer: https://developer.apple.com/help/account/membership/program-enrollment
+
+El modelo y su aviso Apache 2.0, y la licencia MIT de Microsoft están en Resources.
+WebRTC se obtiene mediante Swift Package Manager de la versión fijada 154.0.0;
+su licencia y las de sus componentes deben conservarse al distribuir la app.

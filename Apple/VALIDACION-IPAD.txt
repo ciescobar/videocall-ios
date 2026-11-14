@@ -1,0 +1,56 @@
+VIDEOCALL APPLE 0.1.0 - 14/11/2026
+
+Comprobado en Windows:
+- Analizador de sintaxis Swift: diez archivos, sin errores de sintaxis.
+  No equivale a validación de tipos ni compilación con el SDK Apple.
+- Interoperabilidad con la implementación RoomCrypto Java real del Android:
+  PBKDF2 SHA256 120000 iteraciones, raíz del grupo, AES-GCM 12+N+16, AAD,
+  Unicode, descifrado en ambos sentidos y rechazo al alterar la etiqueta.
+- Configuraciones YAML de XcodeGen/GitHub Actions/Codemagic analizadas.
+- GitHub Actions solo manual, sin permisos de escritura/publicación del repositorio.
+- SFace copiado del proyecto Android y SHA256 verificado:
+  0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79
+- Archivo oficial ONNX Runtime C 1.24.2 verificado:
+  f7100a992d2a8135168c8afd831e6a58b465349101982aa58b3e11d36e600b54
+- Los dos binarios ONNX iOS (dispositivo arm64 y simulador) coinciden byte a byte
+  con ese archivo. Se añadieron mapas de módulo C; no se modificaron binarios.
+  No se compila código C/Objective-C en el paquete SwiftPM.
+- Archivo WebRTC M154 verificado con el checksum de Package.swift 154.0.0:
+  a2bcdda93578c82452ceb6e49d54a2746e1bcb4caf7c2fa601ffac8028b58c16
+- Revisión de encabezados reales M154 de cámara/audio/conexión. Se corrigieron
+  los tipos AVAudioSession.Category/Mode y se balancea una sola activación
+  propia de audio por llamada, aunque se cambie repetidamente el altavoz.
+- Revisión de roles offer/answer, candidatos pendientes, deduplicación, historial
+  de sesiones terminadas, caducidad de presencia/señales, cierre de captura y
+  bloqueo de resultados de permisos/verificación después de cancelar.
+- Preparación del ZIP con verificación CRC y hash de cada archivo del paquete.
+- APK Android 0.3.2 sin cambios. SHA256:
+  20d92c284cc7b54235a6c3a5f6748943877f4d72341dd7a5405a6d991851ddd9
+- ADB no mostró equipos Android conectados durante esta revisión. ADB no detecta
+  ni permite instalar apps en el iPad; no se ha operado su cámara ni pantalla.
+
+Pendiente / límites:
+- Swift Playground: dependencias binarias no confirmadas compatibles. Hay
+  restricciones reportadas; no se afirma que el paquete ejecute en el iPad.
+- Compilación completa y enlace en un entorno Apple. No hay Xcode/SDK iOS aquí.
+- Ejecución de los flujos de nube: no se han creado cuentas/repositorios,
+  subido archivos ni activado servicios de pago.
+- Firma, instalación, permisos y ciclo de vida en equipos Apple reales.
+- Verificación del preprocesado/puntos Vision y precisión facial. El mismo modelo
+  no garantiza idénticos resultados a ML Kit; no hay evaluación biométrica/PAD.
+- Resolución DNS, MQTT TLS, descubrimiento iPad/Android, intercambio SDP/ICE,
+  audio/video, orientación, alternancia de cámaras y liberación real de recursos.
+- Asignación TURN y llamada entre redes distintas/datos móviles: sin confirmar.
+- Capturas/llamadas exitosas del usuario con Android no certifican esta versión Apple.
+- Los flujos actuales compilan SIN FIRMA solo para comprobar el código: el
+  artefacto .app resultante no es un instalador válido para un iPad real.
+
+Repetir comprobaciones locales:
+  python tools/validate_ipad.py
+  python tools/prepare_ipad.py
+Estos scripts requieren cryptography y, para validar, tree-sitter,
+tree-sitter-swift y pyyaml (locales de trabajo en .gradle/ipad-reference/python).
+También requieren los archivos descargados verificados de Microsoft/WebRTC.
+No se incluyen cachés, herramientas de análisis ni archivos temporales en el ZIP.
+
+Consultar LEEME-PRIMERO.txt para compilación en nube y matriz de pruebas físicas.

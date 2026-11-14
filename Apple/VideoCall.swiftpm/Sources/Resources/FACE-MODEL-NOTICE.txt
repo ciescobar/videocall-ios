@@ -1,0 +1,7 @@
+VideoCall uses the unmodified face_recognition_sface_2021dec.onnx model from OpenCV Zoo.
+Source: https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface
+SHA256: 0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79
+Copyright (C) 2021, Shenzhen Institute of Artificial Intelligence and Robotics for Society.
+Apache License 2.0: see SFACE-LICENSE.txt in these assets.
+Face detection and landmarks are provided by Google ML Kit; inference by Microsoft ONNX Runtime.
+The application alignment and matching policy are experimental. No anti-spoofing certification is claimed.

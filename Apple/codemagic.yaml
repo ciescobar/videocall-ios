@@ -1,0 +1,21 @@
+workflows:
+  ios-compile-check:
+    name: VideoCall iOS - comprobar compilación sin firma
+    instance_type: mac_mini_m2
+    max_build_duration: 40
+    environment:
+      xcode: latest
+    scripts:
+      - name: Preparar proyecto
+        script: |
+          brew install xcodegen
+          cd Apple
+          xcodegen generate --spec project.yml
+      - name: Compilar sin firma (no crea una app instalable)
+        script: |
+          set -o pipefail
+          cd Apple
+          xcodebuild -project VideoCall.xcodeproj -scheme VideoCall -configuration Debug -destination 'generic/platform=iOS' -derivedDataPath ../build-ios CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build-device.log
+    artifacts:
+      - Apple/*.log
+      - build-ios/Build/Products/Debug-iphoneos/VideoCall.app
