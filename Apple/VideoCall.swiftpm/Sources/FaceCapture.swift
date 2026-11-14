@@ -16,6 +16,9 @@ struct FaceFeedback {
     var distance = false
     var imageGood = false
     var poseGood = false
+    var isUserTest = false
+    var testStatus = 0
+    var testName = ""
     var faceRect = CGRect.zero
     var imageAspect: CGFloat = 0.75
     var observedAt = 0.0
@@ -35,6 +38,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private let ci = CIContext(options: [.cacheIntermediates: false])
     private let name: String
     private let profile: FaceProfile?
+    private let testMode: Bool
     private let completion: (FaceProfile) -> Void
     private var model: FaceModel?
     private var active = true // Main-thread delivery gate; worker uses stopped.
@@ -48,6 +52,8 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private var deadline = ProcessInfo.processInfo.systemUptime + 180
     private var stability = FaceStability()
     private var capturedAt = 0.0
+    private var probe = FaceProbe()
+    private var lastTestBeep = 0.0
     private var pauseUntil: TimeInterval = 0
     private var stickyUntil: TimeInterval = 0
     private var stickyText = ""
@@ -58,15 +64,15 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private var failures = 0
     private var player: AVAudioPlayer?
 
-    init(name: String, profile: FaceProfile?, completion: @escaping (FaceProfile) -> Void) {
-        self.name = name; self.profile = profile; self.completion = completion
-        steps = profile == nil ? FacePose.allCases : [.front, FacePose.allCases.dropFirst().randomElement()!, .front]
-        super.init(); feedback.total = steps.count
+    init(name: String, profile: FaceProfile?, test: Bool = false, completion: @escaping (FaceProfile) -> Void) {
+        self.name = name; self.profile = profile; self.testMode = test; self.completion = completion
+        steps = test ? [.front] : profile == nil ? FacePose.allCases : [.front, FacePose.allCases.dropFirst().randomElement()!, .front]
+        super.init(); feedback.total = steps.count; feedback.isUserTest = test
     }
     func start() {
         guard active else { return }
         let until = UserDefaults.standard.double(forKey: "faceCooldown")
-        guard Date().timeIntervalSince1970 >= until else {
+        guard testMode || Date().timeIntervalSince1970 >= until else {
             publishError("Espera \(Int(ceil(until - Date().timeIntervalSince1970))) segundos antes de intentarlo de nuevo."); return
         }
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
@@ -89,7 +95,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     func orient(_ value: AVCaptureVideoOrientation) {
         queue.async {
             guard self.orientation != value else { return }
-            self.orientation = value; self.stability.reset()
+            self.orientation = value; self.stability.reset(); self.probe.reset()
             if let link = self.output?.connection(with: .video), link.isVideoOrientationSupported { link.videoOrientation = value }
         }
     }
@@ -111,7 +117,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         output = out; configured = true
     }
     private func publish(_ value: FaceFeedback) { onMain { [weak self] in guard let self = self, self.active else { return }; self.feedback = value } }
-    private func publishError(_ value: String) { var f = FaceFeedback(); f.text = value; f.fatal = true; publish(f) }
+    private func publishError(_ value: String) { var f = FaceFeedback(); f.isUserTest = testMode; f.text = value; f.fatal = true; publish(f) }
     private func moved(_ yaw: Double, _ pitch: Double) -> Bool {
         steps[samples.count].moved(from: previousPose, yaw: yaw, pitch: pitch,
             previousYaw: previousYaw, previousPitch: previousPitch)
@@ -119,10 +125,11 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         let now = ProcessInfo.processInfo.systemUptime
         guard !stopped, now - lastTime >= 0.10, now >= pauseUntil, samples.count < steps.count else { return }; lastTime = now
-        if now > deadline { publishError("Se agotó el tiempo. Cancela y vuelve a intentarlo con buena luz."); shutdown(); return }
+        if !testMode && now > deadline { publishError("Se agotó el tiempo. Cancela y vuelve a intentarlo con buena luz."); shutdown(); return }
         guard let buffer = CMSampleBufferGetImageBuffer(sampleBuffer),
               let image = ci.createCGImage(CIImage(cvPixelBuffer: buffer), from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(buffer), height: CVPixelBufferGetHeight(buffer))) else { return }
         var f = FaceFeedback(); f.pose = steps[samples.count]; f.accepted = samples.count; f.total = steps.count
+        f.isUserTest = testMode
         f.imageAspect = CGFloat(image.width) / CGFloat(image.height); f.capturedAt = capturedAt
         do {
             // Ask the rectangle detector explicitly for the revision that estimates pitch.
@@ -132,14 +139,14 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             let handler = VNImageRequestHandler(cgImage: image, orientation: .up, options: [:])
             try handler.perform([detector])
             guard let faces = detector.results, faces.count == 1, let detected = faces.first else {
-                stability.reset(); f.text = "Muestra un solo rostro, completo y con buena luz."; publish(f); return
+                stability.reset(); probe.reset(); f.text = "Muestra un solo rostro, completo y con buena luz."; publish(f); return
             }
             let request = VNDetectFaceLandmarksRequest()
             request.revision = VNDetectFaceLandmarksRequestRevision3
             request.inputFaceObservations = [detected]
             try handler.perform([request])
             guard let face = request.results?.first else {
-                stability.reset(); f.text = "Mira a la cámara para localizar ojos, nariz y boca."; publish(f); return
+                stability.reset(); probe.reset(); f.text = "Mira a la cámara para localizar ojos, nariz y boca."; publish(f); return
             }
             let w = CGFloat(image.width), h = CGFloat(image.height), side = min(w, h)
             let rect = CGRect(x: face.boundingBox.minX * w, y: (1 - face.boundingBox.maxY) * h,
@@ -160,7 +167,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             guard let angles = FaceAngles.radians(yaw: detected.yaw?.doubleValue ?? face.yaw?.doubleValue,
                 pitch: detected.pitch?.doubleValue ?? face.pitch?.doubleValue,
                 roll: detected.roll?.doubleValue ?? face.roll?.doubleValue) else {
-                stability.reset(); f.text = hint ?? "Todavía no leo la inclinación: mira a la cámara, con ojos y nariz visibles."
+                stability.reset(); probe.reset(); f.text = hint ?? "Todavía no leo la inclinación: mira a la cámara, con ojos y nariz visibles."
                 publish(f); return
             }
             let yaw = angles.yaw, pitch = angles.pitch, roll = angles.roll
@@ -171,14 +178,27 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             }
             if hint == nil && !moved(yaw, pitch) { hint = "Sigue un poco la flecha; la foto se toma sola." }
             if let hint = hint {
+                probe.reset()
                 _ = stability.observe(at: now, good: false); f.hold = stability.progress
                 f.text = now < stickyUntil ? stickyText : hint; publish(f); return
             }
             f.good = true; f.text = "¡Así está bien! Tomando foto automáticamente…"
+            if testMode { f.testStatus = probe.status(at: now); f.testName = profile?.name ?? "" }
             let ready = stability.observe(at: now, good: true); f.hold = stability.progress
             guard ready else { publish(f); return }
             guard let model = model else { return }
             let vector = try model.extract(image, face: face)
+            if testMode {
+                guard let profile = profile else { publishError("Falta el registro local para USER TEST."); shutdown(); return }
+                let checkedAt = ProcessInfo.processInfo.systemUptime
+                let oldStatus = probe.status(at: checkedAt)
+                f.testStatus = probe.observe(match: FaceMath.matches(vector, profile.samples), at: checkedAt)
+                f.testName = profile.name; f.good = f.testStatus == 3; f.hold = 0
+                f.text = f.testStatus == 3 ? "USUARIO IDENTIFICADO" : f.testStatus == 2 ? "Coincidencia inicial; confirmando…" : "El rostro no coincide con el usuario registrado."
+                stability.reset(); publish(f)
+                if f.testStatus == 3 && oldStatus != 3 && now - lastTestBeep > 2 { lastTestBeep = now; beep() }
+                return // Diagnostic never saves a profile, changes authorization or completes a call gate.
+            }
             if let profile = profile {
                 guard FaceMath.matches(vector, profile.samples) else {
                     failures += 1; stability.reset()
@@ -207,7 +227,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                 }
             }
         } catch {
-            stability.reset(); f.text = error.localizedDescription; f.good = false; publish(f)
+            stability.reset(); probe.reset(); f.text = error.localizedDescription; f.good = false; f.testStatus = 0; publish(f)
         }
     }
     private func quality(_ buffer: CVPixelBuffer, rect: CGRect) -> String? {

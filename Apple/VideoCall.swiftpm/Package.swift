@@ -6,10 +6,10 @@ let package = Package(
     name: "VideoCall",
     platforms: [.iOS("17.0")],
     products: [.iOSApplication(
-        name: "VideoCall", targets: ["AppModule"],
+        name: "MI-DRIVER", targets: ["AppModule"],
         bundleIdentifier: "com.mitech.videocall.applelab",
         displayVersion: "0.1.3", bundleVersion: "4",
-        appIcon: .placeholder(icon: .camera), accentColor: .presetColor(.green),
+        appIcon: .asset("AppIcon"), accentColor: .presetColor(.blue),
         supportedDeviceFamilies: [.pad, .phone],
         supportedInterfaceOrientations: [.portrait, .landscapeRight, .landscapeLeft,
             .portraitUpsideDown(.when(deviceFamilies: [.pad]))],

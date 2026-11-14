@@ -1,7 +1,6 @@
 import SwiftUI
 
-private let faceMint = Color(red: 0.25, green: 0.94, blue: 0.73)
-private let faceBlue = Color(red: 0.34, green: 0.70, blue: 1)
+private let faceMint = MIBrand.primary
 
 struct FaceCameraView: View {
     @ObservedObject var capture: FaceCapture
@@ -16,10 +15,10 @@ struct FaceCameraView: View {
                         .accessibilityLabel("Cancelar identificación")
                     Spacer()
                     VStack(spacing: 3) {
-                        Text("Tu identidad").font(.headline)
+                        Text(feedback.isUserTest ? "MI-DRIVER · USER TEST" : "MI-DRIVER · Tu identidad").font(.headline)
                         AppVersionBadge()
-                        Text("Paso \(min(feedback.accepted + 1, feedback.total)) de \(feedback.total)")
-                            .font(.caption).foregroundStyle(.white.opacity(0.6))
+                        Text(feedback.isUserTest ? "Prueba local continua" : "Paso \(min(feedback.accepted + 1, feedback.total)) de \(feedback.total)")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
                     Button(action: capture.toggleSound) {
@@ -37,8 +36,8 @@ struct FaceCameraView: View {
                     ScrollView { instructions }.frame(maxHeight: geometry.size.height * 0.43)
                 }
             }.padding(20).frame(maxWidth: 1100).frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(red: 0.025, green: 0.065, blue: 0.085))
-        }.tint(faceMint)
+                .background(MIBrand.background)
+        }.tint(faceMint).foregroundStyle(MIBrand.text)
     }
     private var camera: some View {
         ZStack(alignment: .top) {
@@ -47,27 +46,36 @@ struct FaceCameraView: View {
             HStack(spacing: 6) {
                 Image(systemName: "lock.shield.fill")
                 Text("Procesamiento en este iPad")
-            }.font(.caption2.weight(.medium)).padding(.horizontal, 12).padding(.vertical, 8)
+            }.font(.caption2.weight(.medium)).foregroundStyle(.white).padding(.horizontal, 12).padding(.vertical, 8)
                 .background(.black.opacity(0.5), in: Capsule()).padding(.top, 14)
-        }.clipShape(RoundedRectangle(cornerRadius: 30))
+        }.clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 30).stroke(.white.opacity(0.1), lineWidth: 1))
     }
     private var instructions: some View {
         VStack(spacing: 14) {
-            HStack(spacing: 8) {
+            if !feedback.isUserTest { HStack(spacing: 8) {
                 ForEach(0..<feedback.total, id: \.self) { index in
                     ZStack {
-                        Circle().fill(index < feedback.accepted ? faceMint : .white.opacity(0.08))
-                        if index < feedback.accepted { Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(.black) }
-                        else { Text("\(index + 1)").font(.caption.bold()).foregroundStyle(index == feedback.accepted ? faceMint : .white.opacity(0.4)) }
+                        Circle().fill(index < feedback.accepted ? faceMint : MIBrand.text.opacity(0.08))
+                        if index < feedback.accepted { Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(MIBrand.surface) }
+                        else { Text("\(index + 1)").font(.caption.bold()).foregroundStyle(index == feedback.accepted ? faceMint : MIBrand.text.opacity(0.4)) }
                     }.frame(width: 30, height: 30)
                         .overlay(Circle().stroke(index == feedback.accepted ? faceMint : .clear, lineWidth: 2))
                 }
-            }.animation(.easeInOut(duration: 0.25), value: feedback.accepted)
+            }.animation(.easeInOut(duration: 0.25), value: feedback.accepted) }
+            if feedback.isUserTest {
+                VStack(spacing: 5) {
+                    Text(feedback.testStatus == 3 ? "USUARIO IDENTIFICADO" : feedback.testStatus == 2 ? "Confirmando coincidencia…" : feedback.testStatus == 1 ? "Rostro no reconocido" : "Coloca un rostro frente a la cámara")
+                        .font(.headline).foregroundStyle(feedback.testStatus == 3 ? MIBrand.good : feedback.testStatus == 1 ? MIBrand.warning : MIBrand.text)
+                    if feedback.testStatus == 3 { Text(feedback.testName).font(.title3.bold()) }
+                    Text("Comprobación local; no modifica el perfil ni autoriza llamadas.").font(.caption2).foregroundStyle(.secondary)
+                }.multilineTextAlignment(.center).padding(12).frame(maxWidth: .infinity)
+                    .background(MIBrand.surface, in: RoundedRectangle(cornerRadius: 12))
+            }
             Text(feedback.fatal ? "Necesitamos intentarlo de nuevo" : feedback.pose.title)
                 .font(.title2.bold()).multilineTextAlignment(.center)
             Text(feedback.text).font(.subheadline.weight(.medium))
-                .foregroundStyle(feedback.fatal ? .orange : feedback.good ? faceMint : .white.opacity(0.8))
+                .foregroundStyle(feedback.fatal ? MIBrand.warning : feedback.good ? faceMint : MIBrand.text.opacity(0.8))
                 .multilineTextAlignment(.center).frame(minHeight: 40)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 check("Centro", good: feedback.centered)
@@ -84,7 +92,7 @@ struct FaceCameraView: View {
                 ProgressView(value: feedback.good ? feedback.hold : Double(feedback.score) / 100)
                     .tint(faceMint).animation(.linear(duration: 0.1), value: feedback.hold)
                 Text("La foto se toma sola. No necesitas llenar el óvalo ni llegar a 100. Sigue las flechas con giros pequeños.")
-                    .font(.caption).foregroundStyle(.white.opacity(0.5)).multilineTextAlignment(.center)
+                    .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
             }
             Button(action: capture.toggleMirror) {
                 Label(capture.mirrored ? "Vista espejo · cambiar" : "Vista directa · cambiar", systemImage: "arrow.left.arrow.right")
@@ -94,9 +102,9 @@ struct FaceCameraView: View {
     }
     private func check(_ title: String, good: Bool) -> some View {
         Label(title, systemImage: good ? "checkmark.circle.fill" : "circle.dotted")
-            .font(.caption2.weight(.medium)).foregroundStyle(good ? faceMint : .white.opacity(0.45))
+            .font(.caption2.weight(.medium)).foregroundStyle(good ? faceMint : MIBrand.text.opacity(0.55))
             .padding(.horizontal, 10).padding(.vertical, 8)
-            .background(good ? faceMint.opacity(0.10) : .white.opacity(0.04), in: Capsule())
+            .background(good ? faceMint.opacity(0.10) : MIBrand.surface, in: Capsule())
     }
 }
 
@@ -113,6 +121,7 @@ struct FaceHalo: View {
         }.accessibilityHidden(true)
     }
     private func draw(context: inout GraphicsContext, size: CGSize, now: Double, animationTime: Double) {
+        let faceMint = MIBrand.stageGood, faceBlue = MIBrand.stageAccent
         guard size.width > 0, size.height > 0 else { return }
         // Match AVCaptureVideoPreviewLayer.resizeAspect, including letterboxing.
         let aspect = max(0.1, feedback.imageAspect)

@@ -6,7 +6,7 @@ struct VideoCallApp: App {
     @Environment(\.scenePhase) private var phase
     var body: some Scene {
         WindowGroup {
-            RootView().environmentObject(state).preferredColorScheme(.dark)
+            RootView().environmentObject(state)
                 .onChange(of: phase) { value in
                     if value == .background { state.goBackground() }
                     if value == .active { state.goForeground() }
@@ -15,8 +15,8 @@ struct VideoCallApp: App {
     }
 }
 
-private let mint = Color(red: 0.25, green: 0.91, blue: 0.70)
-private let appBackground = Color(red: 0.035, green: 0.075, blue: 0.10)
+private let mint = MIBrand.primary
+private let appBackground = MIBrand.background
 
 struct RootView: View {
     @EnvironmentObject var state: AppState
@@ -32,24 +32,25 @@ struct RootView: View {
             else { welcome }
         }
         .tint(mint)
+        .foregroundStyle(MIBrand.text)
         .fullScreenCover(item: $state.faceRequest) { request in FaceFlowView(request: request).environmentObject(state).interactiveDismissDisabled() }
         .sheet(isPresented: $settings) { settingsView }
-        .alert("VideoCall", isPresented: Binding(get: { state.message != nil }, set: { if !$0 { state.message = nil } })) {
+        .alert("MI-DRIVER", isPresented: Binding(get: { state.message != nil }, set: { if !$0 { state.message = nil } })) {
             Button("Entendido", role: .cancel) { state.message = nil }
         } message: { Text(state.message ?? "") }
     }
     private var welcome: some View {
         ScrollView {
             VStack(spacing: 25) {
-                Image(systemName: "video.bubble.fill").font(.system(size: 72)).foregroundStyle(mint)
-                Text("VideoCall").font(.system(size: 40, weight: .bold, design: .rounded))
+                MIBrandLogo(height: 150)
+                Text("MI-DRIVER").font(.system(size: 40, weight: .bold, design: .rounded)).foregroundStyle(mint)
                 AppVersionBadge()
                 Text("Más cerca, estés donde estés").font(.title3).foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 16) {
                     Label("Audio y video con Android", systemImage: "person.2.fill")
                     Label("Registro facial en este iPad", systemImage: "faceid")
                     Label("Sin configurar servidores", systemImage: "network")
-                }.padding(25).frame(maxWidth: .infinity, alignment: .leading).background(.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 24))
+                }.padding(25).frame(maxWidth: .infinity, alignment: .leading).background(MIBrand.surface, in: RoundedRectangle(cornerRadius: 12))
                 if let fatal = state.fatal { Text(fatal).foregroundStyle(.orange).textSelection(.enabled) }
                 Button(action: state.requestEntry) {
                     Label(state.profile == nil ? "Crear mi registro facial" : "Verificar mi identidad", systemImage: "faceid")
@@ -65,7 +66,7 @@ struct RootView: View {
             List {
                 Section {
                     HStack(spacing: 15) {
-                        Image(systemName: "person.crop.circle.fill").font(.largeTitle).foregroundStyle(mint)
+                        Image("MIMark", bundle: AppResources.bundle).resizable().scaledToFit().frame(width: 52, height: 52).clipShape(RoundedRectangle(cornerRadius: 12))
                         VStack(alignment: .leading, spacing: 4) {
                             Text(state.profile?.name ?? "Mi perfil").font(.headline)
                             Text(state.status).font(.caption).foregroundStyle(state.online ? mint : .secondary)
@@ -73,11 +74,16 @@ struct RootView: View {
                         }
                     }.padding(.vertical, 8)
                 }
+                Section("Mi identificación") {
+                    Button(action: state.startUserTest) { Label("USER TEST", systemImage: "person.crop.rectangle.badge.checkmark") }
+                        .buttonStyle(.borderedProminent)
+                    Text("Prueba rostros frente a la cámara. Compara únicamente con el perfil de este equipo.").font(.caption).foregroundStyle(.secondary)
+                }
                 Section("Dispositivos disponibles · \(state.devices.count)") {
                     if state.devices.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Esperando al otro dispositivo", systemImage: "antenna.radiowaves.left.and.right")
-                            Text("Abre VideoCall en Android y completa su identificación. Ambos deben tener internet y la app visible.").font(.subheadline).foregroundStyle(.secondary)
+                            Text("Abre MI-DRIVER en el otro equipo y completa su identificación. Ambos deben tener internet y la app visible.").font(.subheadline).foregroundStyle(.secondary)
                         }.padding(.vertical, 18)
                     }
                     ForEach(state.devices) { device in
@@ -92,7 +98,7 @@ struct RootView: View {
                 Section { Text("Grupo público de prueba: los nombres de las instalaciones participantes son visibles para ellas. La verificación facial se realiza localmente; no acredita ante el otro equipo una identidad certificada.").font(.footnote).foregroundStyle(.secondary) }
             }
             .scrollContentBackground(.hidden).background(appBackground)
-            .navigationTitle("VideoCall")
+            .navigationTitle("MI-DRIVER")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { settings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("Ajustes") } }
         }
     }
@@ -112,7 +118,7 @@ struct RootView: View {
     private var settingsView: some View {
         NavigationStack {
             Form {
-                Section("Acerca de VideoCall") {
+                Section("Acerca de MI-DRIVER") {
                     Text(AppVersion.label).textSelection(.enabled)
                 }
                 Section("Validación") {
@@ -145,6 +151,7 @@ func roundControl(_ label: String, _ symbol: String, color: Color = .white.opaci
 }
 
 struct ActiveCallView: View {
+    private let mint = MIBrand.stageAccent
     let session: Session
     @ObservedObject var media: CallMedia
     @EnvironmentObject var state: AppState
@@ -226,7 +233,7 @@ struct FaceFlowView: View {
             else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        Image(systemName: "faceid").font(.system(size: 65)).foregroundStyle(mint)
+                        MIBrandLogo(height: 100)
                         Text("Tu rostro, tu perfil").font(.largeTitle.bold())
                         AppVersionBadge()
                         Text("Tomaremos cinco muestras: frente, un giro leve a cada lado, arriba y abajo. No necesitas mostrar el perfil completo.").font(.title3)

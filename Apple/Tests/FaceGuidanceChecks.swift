@@ -73,6 +73,17 @@ import Foundation
         check(!stability.observe(at: 19, good: true) && stability.progress == 0, "Clock rollback resets hold")
         stability.reset()
         check(!stability.observe(at: 15, good: true), "Orientation/sample reset requires new hold")
+        var probe = FaceProbe()
+        check(probe.observe(match: true, at: 0) == 2, "One matching capture only confirms")
+        check(probe.observe(match: true, at: 0.3) == 3, "Two matching captures identify")
+        check(probe.observe(match: false, at: 0.6) == 1, "Another face clears identification")
+        check(probe.observe(match: true, at: 0.9) == 2, "Must confirm again after mismatch")
+        check(probe.observe(match: true, at: 1.2) == 3, "Second fresh match identifies again")
+        check(probe.status(at: 2.3) == 0, "Old results expire")
+        check(probe.observe(match: true, at: 3) == 2, "Long interruption clears prior matches")
+        check(probe.observe(match: true, at: 0) == 2, "Probe clock rollback clears prior matches")
+        probe.reset(); check(probe.status(at: 0.1) == 0, "Lost face/close clears probe")
+        check(probe.observe(match: true, at: .nan) == 0, "Invalid probe time rejected")
         print("PASS: \(checks) facial guidance checks; no biometric accuracy claim")
     }
 }

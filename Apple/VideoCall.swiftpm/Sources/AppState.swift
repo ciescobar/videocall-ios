@@ -10,7 +10,7 @@ struct Session: Identifiable {
     let video: Bool
     let caller: Bool
 }
-struct FaceRequest: Identifiable { let id = UUID(); let incoming: String?; let enroll: Bool }
+struct FaceRequest: Identifiable { let id = UUID(); let incoming: String?; let enroll: Bool; var test = false }
 
 final class AppState: ObservableObject {
     @Published var profile: FaceProfile?
@@ -65,8 +65,13 @@ final class AppState: ObservableObject {
         guard fatal == nil, faceRequest == nil else { return }
         faceRequest = FaceRequest(incoming: nil, enroll: profile == nil)
     }
+    func startUserTest() {
+        guard authorized, profile != nil, call == nil, faceRequest == nil, !background else { return }
+        faceRequest = FaceRequest(incoming: nil, enroll: false, test: true)
+    }
     func faceCapture(name: String, request: FaceRequest) -> FaceCapture {
-        let capture = FaceCapture(name: name, profile: request.enroll ? nil : profile) { [weak self] profile in
+        let capture = FaceCapture(name: name, profile: request.enroll ? nil : profile, test: request.test) { [weak self] profile in
+            guard !request.test else { return }
             guard let self = self, self.faceRequest?.id == request.id, !self.background else { return }
             self.activeFace = nil; self.faceRequest = nil; self.profile = profile
             if let incoming = request.incoming {

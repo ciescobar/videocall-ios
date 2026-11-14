@@ -13,6 +13,24 @@ struct FaceAngles {
     }
 }
 
+// Diagnostic feedback only; has no access to entry authorization or call state.
+struct FaceProbe {
+    private var consecutive = 0
+    private var checked: Double?
+    private var matched = false
+    mutating func reset() { consecutive = 0; checked = nil; matched = false }
+    mutating func observe(match: Bool, at time: Double) -> Int {
+        guard time.isFinite else { reset(); return 0 }
+        if let checked = checked, time < checked || time - checked >= 1.5 { reset() }
+        checked = time; matched = match; consecutive = match ? min(2, consecutive + 1) : 0
+        return status(at: time)
+    }
+    func status(at time: Double) -> Int {
+        guard time.isFinite, let checked = checked, time >= checked, time - checked < 1 else { return 0 }
+        return !matched ? 1 : consecutive < 2 ? 2 : 3
+    }
+}
+
 // Shared capture rules, independent of camera/UI so they can run on the build host.
 enum FacePose: Int, CaseIterable {
     case front, left, right, up, down

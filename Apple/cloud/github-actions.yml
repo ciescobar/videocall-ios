@@ -43,7 +43,7 @@ jobs:
           mkdir -p unsigned/Payload
           ditto build-ios/Build/Products/Debug-iphoneos/VideoCall.app unsigned/Payload/VideoCall.app
           cd unsigned
-          /usr/bin/zip -qry ../VideoCall-iPad-0.1.3-sin-firma.ipa Payload
+          /usr/bin/zip -qry ../MI-DRIVER-iPad-0.1.3-sin-firma.ipa Payload
       - name: Guardar informe
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,5 +55,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: VideoCall-iOS-sin-firma
-          path: VideoCall-iPad-0.1.3-sin-firma.ipa
+          path: MI-DRIVER-iPad-0.1.3-sin-firma.ipa
           retention-days: 7
