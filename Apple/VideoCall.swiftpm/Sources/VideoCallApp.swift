@@ -77,6 +77,8 @@ struct RootView: View {
                 Section("Mi identificación") {
                     Button(action: state.startUserTest) { Label("USER TEST", systemImage: "person.crop.rectangle.badge.checkmark") }
                         .buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary)
+                    Button(action: state.startReenrollment) { Label("Volver a matricular", systemImage: "arrow.triangle.2.circlepath.camera") }
+                        .buttonStyle(.bordered)
                     Text("Prueba rostros frente a la cámara. Compara únicamente con el perfil de este equipo.").font(.caption).foregroundStyle(.secondary)
                 }.listRowBackground(MIBrand.surface)
                 Section("Dispositivos disponibles · \(state.devices.count)") {
@@ -234,22 +236,25 @@ struct FaceFlowView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         MIBrandLogo(height: 100)
-                        Text("Tu rostro, tu perfil").font(.largeTitle.bold())
+                        Text(request.reenroll ? "Volver a matricular" : "Tu rostro, tu perfil").font(.largeTitle.bold())
                         AppVersionBadge()
-                        Text("Tomaremos cinco muestras: frente, un giro leve a cada lado, arriba y abajo. No necesitas mostrar el perfil completo.").font(.title3)
-                        TextField("Tu nombre en las llamadas", text: $name).textContentType(.name).textFieldStyle(.roundedBorder)
+                        Text("Repetiremos cinco posiciones: frontal → arriba → abajo → izquierda → derecha. Basta un giro leve; no necesitas mostrar el perfil completo.").font(.title3)
+                        if request.reenroll {
+                            Text("Tu nombre y perfil actual se conservan hasta completar y guardar las cinco capturas. La primera comprueba que seas el usuario registrado.").font(.subheadline)
+                        }
+                        TextField("Tu nombre en las llamadas", text: $name).textContentType(.name).textFieldStyle(.roundedBorder).disabled(request.reenroll)
                         Label("Buena luz de frente; ojos, nariz y boca visibles. Mantén el iPad quieto y a la altura de los ojos.", systemImage: "sun.max.fill")
                         Label("La cámara captura automáticamente cuando vas bien. Escucharás un pitido breve si el sonido está activado.", systemImage: "camera.fill")
                         Text("Las fotos se procesan en memoria y se descartan. Guardamos cinco plantillas numéricas cifradas solo en este iPad. Se usan al entrar y antes de contestar. Puedes borrarlas desde Ajustes. Es una comprobación experimental; podría confundirse o aceptar una foto o video.").font(.subheadline).foregroundStyle(.secondary)
                         Toggle("Acepto crear y guardar mi plantilla facial en este equipo", isOn: $consent)
-                        Button("Comenzar registro") { begin() }.buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary).controlSize(.large)
+                        Button(request.reenroll ? "Repetir cinco fotos" : "Comenzar registro") { begin() }.buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary).controlSize(.large)
                             .disabled(!consent || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        Button("Cancelar", role: .cancel) { state.cancelFace() }
+                        Button(request.reenroll ? "Cancelar y conservar mi perfil" : "Cancelar", role: .cancel) { state.cancelFace() }
                     }.padding(30).frame(maxWidth: 650).frame(maxWidth: .infinity)
                 }
             }
         }.tint(mint)
-        .onAppear { if !request.enroll { name = state.profile?.name ?? ""; begin() } }
+        .onAppear { if request.reenroll { name = state.profile?.name ?? "" }; if !request.enroll { name = state.profile?.name ?? ""; begin() } }
         .onDisappear { capture?.stop() }
     }
     private func begin() {

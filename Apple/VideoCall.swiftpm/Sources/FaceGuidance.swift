@@ -34,6 +34,7 @@ struct FaceProbe {
 // Shared capture rules, independent of camera/UI so they can run on the build host.
 enum FacePose: Int, CaseIterable {
     case front, left, right, up, down
+    static let enrollmentSteps: [FacePose] = [.front, .up, .down, .left, .right]
     var title: String { ["Mira de frente", "Gira suavemente hacia un lado", "Gira hacia el otro lado", "Mira un poco arriba", "Mira un poco abajo"][rawValue] }
     var symbol: String { ["face.smiling", "arrow.turn.up.left", "arrow.turn.up.right", "arrow.up", "arrow.down"][rawValue] }
     func accepts(yaw: Double, pitch: Double, roll: Double, relativeTo neutral: FaceAngles? = nil) -> Bool {

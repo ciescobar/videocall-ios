@@ -6,6 +6,8 @@ import Foundation
         func check(_ value: Bool, _ label: String) {
             precondition(value, label); checks += 1
         }
+        check(FacePose.enrollmentSteps == [.front, .up, .down, .left, .right], "Enrollment uses all five poses in the requested order")
+        check(Set(FacePose.enrollmentSteps.map(\.rawValue)).count == 5, "Enrollment has five distinct poses")
         check(FacePose.left.accepts(yaw: 7, pitch: 0, roll: 0), "Small side turn accepted")
         check(!FacePose.left.accepts(yaw: 5, pitch: 0, roll: 0), "Pose boundary respected")
         check(!FacePose.left.accepts(yaw: 40, pitch: 0, roll: 0), "Extreme profile rejected")

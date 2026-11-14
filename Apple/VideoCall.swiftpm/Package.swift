@@ -8,7 +8,7 @@ let package = Package(
     products: [.iOSApplication(
         name: "MI-DRIVER", targets: ["AppModule"],
         bundleIdentifier: "com.mitech.videocall.applelab",
-        displayVersion: "0.1.3", bundleVersion: "4",
+        displayVersion: "0.1.4", bundleVersion: "5",
         appIcon: .asset("AppIcon"), accentColor: .presetColor(.blue),
         supportedDeviceFamilies: [.pad, .phone],
         supportedInterfaceOrientations: [.portrait, .landscapeRight, .landscapeLeft,

@@ -10,7 +10,7 @@ struct Session: Identifiable {
     let video: Bool
     let caller: Bool
 }
-struct FaceRequest: Identifiable { let id = UUID(); let incoming: String?; let enroll: Bool; var test = false }
+struct FaceRequest: Identifiable { let id = UUID(); let incoming: String?; let enroll: Bool; var test = false; var reenroll = false }
 
 final class AppState: ObservableObject {
     @Published var profile: FaceProfile?
@@ -69,11 +69,17 @@ final class AppState: ObservableObject {
         guard authorized, profile != nil, call == nil, faceRequest == nil, !background else { return }
         faceRequest = FaceRequest(incoming: nil, enroll: false, test: true)
     }
+    func startReenrollment() {
+        guard authorized, profile != nil, fatal == nil, call == nil, faceRequest == nil, !background else { return }
+        faceRequest = FaceRequest(incoming: nil, enroll: true, reenroll: true)
+    }
     func faceCapture(name: String, request: FaceRequest) -> FaceCapture {
-        let capture = FaceCapture(name: name, profile: request.enroll ? nil : profile, test: request.test) { [weak self] profile in
+        let capture = FaceCapture(name: name, profile: request.enroll ? nil : profile, test: request.test,
+            replacing: request.reenroll ? profile : nil) { [weak self] profile in
             guard !request.test else { return }
             guard let self = self, self.faceRequest?.id == request.id, !self.background else { return }
             self.activeFace = nil; self.faceRequest = nil; self.profile = profile
+            if request.reenroll { self.message = "Matrícula actualizada: cinco posiciones completadas." }
             if let incoming = request.incoming {
                 guard self.call?.id == incoming, self.answering else { return }
                 self.permissionsAndStart(answering: true)

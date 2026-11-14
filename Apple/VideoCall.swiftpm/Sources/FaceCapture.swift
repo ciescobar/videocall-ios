@@ -39,6 +39,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private let name: String
     private let profile: FaceProfile?
     private let testMode: Bool
+    private let replacing: FaceProfile?
     private let completion: (FaceProfile) -> Void
     private var model: FaceModel?
     private var active = true // Main-thread delivery gate; worker uses stopped.
@@ -64,9 +65,9 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private var failures = 0
     private var player: AVAudioPlayer?
 
-    init(name: String, profile: FaceProfile?, test: Bool = false, completion: @escaping (FaceProfile) -> Void) {
-        self.name = name; self.profile = profile; self.testMode = test; self.completion = completion
-        steps = test ? [.front] : profile == nil ? FacePose.allCases : [.front, FacePose.allCases.dropFirst().randomElement()!, .front]
+    init(name: String, profile: FaceProfile?, test: Bool = false, replacing: FaceProfile? = nil, completion: @escaping (FaceProfile) -> Void) {
+        self.name = name; self.profile = profile; self.testMode = test; self.replacing = replacing; self.completion = completion
+        steps = test ? [.front] : profile == nil ? FacePose.enrollmentSteps : [.front, FacePose.allCases.dropFirst().randomElement()!, .front]
         super.init(); feedback.total = steps.count; feedback.isUserTest = test
     }
     func start() {
@@ -188,6 +189,11 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             guard ready else { publish(f); return }
             guard let model = model else { return }
             let vector = try model.extract(image, face: face)
+            if let replacing = replacing, samples.isEmpty, !FaceMath.matches(vector, replacing.samples) {
+                stability.reset(); f.hold = 0; f.good = false
+                f.text = "Mira de frente con el rostro del usuario registrado. Tu perfil anterior se conserva."
+                pauseUntil = now + 0.5; publish(f); return
+            }
             if testMode {
                 guard let profile = profile else { publishError("Falta el registro local para USER TEST."); shutdown(); return }
                 let checkedAt = ProcessInfo.processInfo.systemUptime
@@ -219,11 +225,13 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             capturedAt = now; f.capturedAt = now; f.hold = 0; f.accepted = samples.count; f.flash = true; f.text = "¡Captura lista!"; publish(f); beep()
             if samples.count == steps.count {
                 let result = profile ?? FaceProfile(version: 1, name: name, samples: samples)
-                do { if profile == nil { try FaceStore.save(result) } }
-                catch { publishError("No se pudo guardar el registro: " + error.localizedDescription); shutdown(); return }
                 shutdown()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
-                    guard let self = self, self.active else { return }; self.active = false; self.completion(result)
+                    guard let self = self, self.active else { return }
+                    // Main-thread commit serializes with Cancel/background, after all five poses.
+                    do { if self.profile == nil { try FaceStore.save(result) } }
+                    catch { self.publishError("No se pudo guardar el registro. Se conserva el perfil anterior: " + error.localizedDescription); return }
+                    self.active = false; self.completion(result)
                 }
             }
         } catch {
