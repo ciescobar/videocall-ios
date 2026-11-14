@@ -37,7 +37,7 @@ final class FaceRuntime {
     }
     private func check(_ status: OpaquePointer?) throws {
         if let status = status {
-            let message = String(cString: api.pointee.GetErrorMessage(status))
+            let message = api.pointee.GetErrorMessage(status).map { String(cString: $0) } ?? "Error sin descripción"
             api.pointee.ReleaseStatus(status); throw LabError.message("Motor facial: " + message)
         }
     }
