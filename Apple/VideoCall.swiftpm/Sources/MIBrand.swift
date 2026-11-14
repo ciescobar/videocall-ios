@@ -10,6 +10,7 @@ enum MIBrand {
     static let good = adaptive(0x2E7D32, 0x65D487)
     static let warning = adaptive(0xB3261E, 0xFF8A80)
     static let text = primary
+    static let onPrimary = adaptive(0xFFFFFF, 0x08111F)
     static let stageBackground = color(0x08111F)
     static let stageAccent = color(0xFFAB70)
     static let stageGood = color(0x65D487)

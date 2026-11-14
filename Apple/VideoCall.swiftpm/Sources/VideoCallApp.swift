@@ -55,7 +55,7 @@ struct RootView: View {
                 Button(action: state.requestEntry) {
                     Label(state.profile == nil ? "Crear mi registro facial" : "Verificar mi identidad", systemImage: "faceid")
                         .font(.headline).frame(maxWidth: .infinity).padding(12)
-                }.buttonStyle(.borderedProminent).disabled(state.fatal != nil)
+                }.buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary).disabled(state.fatal != nil)
                 Text("Versión de validación · mantén la app visible.\nEl registro facial es experimental y no garantiza identidad ni resistencia a fotos o videos.")
                     .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             }.padding(30).frame(maxWidth: 570).frame(maxWidth: .infinity)
@@ -72,11 +72,11 @@ struct RootView: View {
                             Text(state.status).font(.caption).foregroundStyle(state.online ? mint : .secondary)
                             AppVersionBadge()
                         }
-                    }.padding(.vertical, 8)
+                    }.padding(.vertical, 8).listRowBackground(MIBrand.surface)
                 }
                 Section("Mi identificación") {
                     Button(action: state.startUserTest) { Label("USER TEST", systemImage: "person.crop.rectangle.badge.checkmark") }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary)
                     Text("Prueba rostros frente a la cámara. Compara únicamente con el perfil de este equipo.").font(.caption).foregroundStyle(.secondary)
                 }
                 Section("Dispositivos disponibles · \(state.devices.count)") {
@@ -242,7 +242,7 @@ struct FaceFlowView: View {
                         Label("La cámara captura automáticamente cuando vas bien. Escucharás un pitido breve si el sonido está activado.", systemImage: "camera.fill")
                         Text("Las fotos se procesan en memoria y se descartan. Guardamos cinco plantillas numéricas cifradas solo en este iPad. Se usan al entrar y antes de contestar. Puedes borrarlas desde Ajustes. Es una comprobación experimental; podría confundirse o aceptar una foto o video.").font(.subheadline).foregroundStyle(.secondary)
                         Toggle("Acepto crear y guardar mi plantilla facial en este equipo", isOn: $consent)
-                        Button("Comenzar registro") { begin() }.buttonStyle(.borderedProminent).controlSize(.large)
+                        Button("Comenzar registro") { begin() }.buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary).controlSize(.large)
                             .disabled(!consent || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         Button("Cancelar", role: .cancel) { state.cancelFace() }
                     }.padding(30).frame(maxWidth: 650).frame(maxWidth: .infinity)
