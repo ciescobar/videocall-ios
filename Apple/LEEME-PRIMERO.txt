@@ -1,4 +1,10 @@
-MI-DRIVER PARA IPAD / IPHONE - FUENTES 0.1.3
+MI-DRIVER PARA IPAD / IPHONE - FUENTES 0.1.4
+
+ACTUALIZACIÓN VIGENTE 0.1.4 / COMPILACIÓN 5
+Nuevo botón Volver a matricular: frontal, arriba, abajo, izquierda y derecha.
+Perfil anterior conservado hasta completar y guardar la nueva matrícula.
+Detalles en NOVEDADES-0.1.4.txt. IPA: MI-DRIVER-iPad-0.1.4-sin-firma.ipa.
+Actualizar con la misma cuenta Apple, sin desinstalar. Historial debajo.
 14 de noviembre de 2026
 
 ACTUALIZACIÓN 0.1.3

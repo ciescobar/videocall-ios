@@ -1,4 +1,8 @@
-ACTUALIZACIÓN 0.1.3: consultar NOVEDADES-0.1.3.txt para el estado vigente.
+ACTUALIZACIÓN 0.1.4: consultar NOVEDADES-0.1.4.txt para el estado vigente.
+Xcode ARM64 y 61 comprobaciones Swift aprobados. Botón Volver a matricular,
+cinco posiciones ordenadas y conservación del perfil hasta el guardado final.
+
+HISTORIAL 0.1.3:
 La app muestra la versión y compilación instaladas antes del registro y en Ajustes.
 
 HISTORIAL 0.1.2:

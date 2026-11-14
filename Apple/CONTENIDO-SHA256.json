@@ -30,13 +30,13 @@
   "Frameworks/onnxruntime.xcframework/ios-arm64_x86_64-simulator/onnxruntime.framework/Info.plist": "105a541238a323a158b6c0a1134d7c2b22da6a140f2ed48a2182ad2117e8f443",
   "Frameworks/onnxruntime.xcframework/ios-arm64_x86_64-simulator/onnxruntime.framework/Modules/module.modulemap": "7c3cfd13055e856d1eab520889fe221cf92a1c82cb58aee2d0f422c29ce0bcb5",
   "Frameworks/onnxruntime.xcframework/ios-arm64_x86_64-simulator/onnxruntime.framework/onnxruntime": "0ff57cfcae76956ba9e47a30104617b01257f8a3f41e5cf111515e2d40b7d001",
-  "Package.swift": "7a8c2fd5cc4d9edefa44239f3e5fbe3cf93b98e9626fe2b991ece650b368edec",
+  "Package.swift": "ebb8c4f924e5a546e516c18b776340bfc2d505bb3e944de818ec6df226d6e4eb",
   "Sources/AppResources.swift": "e24727d7622b0038c50e9fffd412c22e05fcbea1f2cadd9900b4f6507afdb60a",
-  "Sources/AppState.swift": "fd2abb1232a0af26220cc7cdb4973ced6067a0891021756cafd6b09037cbaaa2",
+  "Sources/AppState.swift": "295c1f13e4202eb380a40f4f0bfba8e361485812fc58edd8275a2d6578c95f78",
   "Sources/AppVersion.swift": "7db5c431d27100a3345f8723920fd67723f000ac41fc0aed38873bdbd2f960ca",
   "Sources/CallMedia.swift": "ed4ecd3aa552fb67ecc1e8fc768fd38c019e11280298b4bfa1dd09c5aed50542",
-  "Sources/FaceCapture.swift": "96ee7e07f5776d522bfa62f32db9e097b93d57c23b351572003865cf36666cd2",
-  "Sources/FaceGuidance.swift": "39443174936c13418b1ea8b41adaeb717eb19dbb23a93da8e0c724680941d122",
+  "Sources/FaceCapture.swift": "4118650de16df4f49b39b4b9f066d19f8122bb8d7f72173a356da5ce94d09e0c",
+  "Sources/FaceGuidance.swift": "be953c561e3a7534b64ee5ccdc9a42eabcb6b045880814571ecf3beaa665ee1a",
   "Sources/FaceGuideScreen.swift": "139827a1d6565f71b69284a77f601f65109b342622d178763515f23736d8d79b",
   "Sources/FaceModel.swift": "1a39060b7403d49439202669c69f16337256bf3370e9148ddb8ae2fdf5ad1cfb",
   "Sources/FaceRuntime.swift": "4828ebd0702b40df17bf987beac3e52570089831f023f5b40ab94a9b09705f59",
@@ -70,5 +70,5 @@
   "Sources/Resources/sface.onnx": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
   "Sources/Resources/WEBRTC-LICENSE.txt": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482",
   "Sources/RoomCrypto.swift": "1a1d1565aaad8b15fafc6b7b517faf26743047b1674b9f2c5c46f3d6f7699ad2",
-  "Sources/VideoCallApp.swift": "804b6d88873d8467f528cdd9be6d7218096a9c500faf35194857647846db25a5"
+  "Sources/VideoCallApp.swift": "b4deda7e506e6314643e6dcdfb6c416830457850d6e977f99d42632ed6928236"
 }

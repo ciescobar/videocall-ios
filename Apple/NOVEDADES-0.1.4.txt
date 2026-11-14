@@ -1,0 +1,46 @@
+MI-DRIVER APPLE 0.1.4 · BUILD 5 · 14/11/2026
+
+VOLVER A MATRICULAR
+Nuevo botón en la pantalla de dispositivos, junto a USER TEST, disponible
+después de identificarse y cuando no hay llamada ni otra captura abierta.
+Permite repetir las cinco posiciones en este orden exacto:
+FRONTAL → ARRIBA → ABAJO → IZQUIERDA → DERECHA.
+Ese mismo orden se aplica a la primera matrícula, tanto en Apple como Android.
+
+El nombre actual se muestra sin permitir modificarlo en este flujo. Se pide
+consentimiento para repetir la captura. La primera foto se compara con el
+perfil anterior para comprobar que sea el usuario registrado. Las restantes
+se comparan con la nueva frontal para conservar coherencia entre muestras.
+Los umbrales, modelo SFace y condiciones cómodas de captura se mantienen.
+
+El perfil anterior no se borra al iniciar ni durante las capturas parciales.
+El reemplazo cifrado es atómico después de completar las cinco posiciones,
+con una comprobación final de que la sesión siga activa. Cancelar o salir
+antes del guardado invalida el resultado pendiente y conserva el perfil.
+La comprobación abreviada al ingresar y USER TEST siguen siendo independientes.
+
+VALIDACIÓN
+- Xcode ARM64: BUILD SUCCEEDED.
+  https://github.com/ciescobar/videocall-ios/actions/runs/43648522903
+  Código: a3b8d4fc24a80454286759e521164b9c50d4750b.
+- 61 comprobaciones Swift aprobadas, incluido el orden explícito de las cinco
+  posiciones distintas. Se mantiene la comprobación del signo de Vision en SDK.
+- IPA verificado: MI-DRIVER, 0.1.4 build 5, ARM64, CRC, icono, permisos,
+  modelo y WebRTC. Tamaño: 51,164,101 bytes.
+  SHA256: 180e74073026750d1fbc9fb978e3c30348ba0127a9deb4f3bce18966f160b446
+- Sintaxis, YAML e interoperabilidad de cifrado Java/Android aprobados.
+- Instalación y pruebas con rostros reales de esta versión Apple pendientes.
+  Las comprobaciones de compilación no acreditan precisión biométrica.
+
+ACTUALIZAR
+Seleccionar distribucion/MI-DRIVER-iPad-0.1.4-sin-firma.ipa en Sideloadly,
+con la misma cuenta Apple. No desinstalar ni borrar el perfil para actualizar.
+Después de entrar, pulsar Volver a matricular y comprobar el indicador 1/5.
+USER TEST permite probar después la coincidencia con el perfil actualizado.
+
+ANDROID
+MI-DRIVER Android 0.3.4 / compilación 8 incorpora el mismo botón y el mismo
+orden. 23 pruebas unitarias y 43 comprobaciones en emulador aprobadas,
+incluidas cancelación inicial, cancelación con cuatro capturas, cancelación
+con cinco pendientes de guardar y reemplazo completo conservando nombre/ID.
+Actualización instalada en el Samsung y binario cotejado por SHA256.
