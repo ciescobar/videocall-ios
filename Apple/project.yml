@@ -33,6 +33,8 @@ targets:
       path: Generated/Info.plist
       properties:
         CFBundleDisplayName: VideoCall
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSCameraUsageDescription: Registro facial local y videollamadas.
         NSMicrophoneUsageDescription: Audio de tus llamadas con otros dispositivos.
         UIApplicationSupportsIndirectInputEvents: true
