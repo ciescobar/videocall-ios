@@ -1,4 +1,6 @@
-ACTUALIZACIÓN 0.1.1: consultar NOVEDADES-0.1.1.txt para el estado vigente.
+ACTUALIZACIÓN 0.1.2: consultar NOVEDADES-0.1.2.txt para el estado vigente.
+Primera captura frontal revisada: lectura de ángulos y adquisición más flexible.
+Xcode y 40 comprobaciones aprobadas. Instalación/prueba física 0.1.2 pendiente.
 El usuario confirmó que pudo abrir la versión 0.1.0 instalada con Sideloadly.
 
 HISTORIAL: VIDEOCALL APPLE 0.1.0 - 14/11/2026

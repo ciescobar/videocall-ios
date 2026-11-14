@@ -1,0 +1,65 @@
+VIDEOCALL APPLE 0.1.2 · BUILD 3 · 14/11/2026
+
+PROBLEMA REPORTADO
+El usuario no consigue ni la primera captura frontal. La cámara debe capturar
+automáticamente sin botón de disparo. No se ha medido en su dispositivo la causa
+exacta: se corrigen posibles bloqueos del código y se flexibiliza la adquisición.
+
+CAMBIOS
+- Detección explícita de rostro con Vision revisión 3, seguida de puntos faciales.
+  Se conservan los ángulos de la detección inicial si la segunda petición no los
+  devuelve. Antes se pedían solo puntos faciales y nil se sustituía por 999,
+  haciendo imposible cumplir la posición si faltaba alguno de los ángulos.
+- Un ángulo ausente sigue impidiendo capturar, con mensaje específico; no se
+  inventa un ángulo cero ni se omite la comprobación.
+- Cámara 1280x720 si está disponible; alternativa 640x480. Rostro mínimo 96 px;
+  tamaño relativo 22–90 % del lado menor y centro con margen 32 % / 35 %.
+  No es necesario llenar el óvalo ni alcanzar puntuación de encuadre 100.
+- Frente: yaw menor de 18 grados, pitch menor de 22 y roll hasta 28.
+  La primera muestra aceptada calibra la postura natural para los giros siguientes.
+  Se mantienen un desplazamiento real de 4 grados entre muestras y límites
+  globales de yaw 40 y pitch 36 grados para evitar perfiles extremos.
+- Captura automática tras al menos tres fotogramas válidos y 250 ms de tiempo
+  válido. Un salto del seguimiento de menos de 300 ms pausa sin borrar el avance.
+  El tiempo inválido no suma y nunca se captura un fotograma inválido. Ausencia
+  de rostro, varios rostros, cambios de orientación y errores reinician la espera.
+- Calidad de imagen: luminancia 45–235 y gradiente mínimo 1.2; se amplían los
+  márgenes anteriores 55–225 / 1.8. No se altera la extracción de plantillas.
+- Indicadores de Centro, Distancia, Imagen y Posición; mensaje explícito de
+  captura automática y confirmación con pitido. Continúa la guía animada.
+
+DATOS Y COMPARACIÓN
+Sin cambios en FaceModel.swift, FaceStore ni FaceMath: SFace, alineación,
+normalización, cifrado y formato del perfil. Se mantienen coherencia de registro
+0.42 y verificación 0.50 frontal / promedio de mejores dos referencias 0.48.
+No se afirma equivalencia de seguridad ni precisión biométrica de estos cambios:
+siguen pendientes calibración y pruebas con usuarios y ataques de foto/video.
+No se transmiten fotografías ni plantillas por MQTT.
+
+REFERENCIAS DE API
+Apple documenta que pitch puede ser nil si la petición no calcula ese ángulo:
+https://developer.apple.com/documentation/vision/vnfaceobservation/pitch
+Entrada de rostros detectados para el análisis de puntos faciales:
+https://developer.apple.com/documentation/vision/vndetectfacelandmarksrequest
+
+VALIDACIÓN
+- Xcode ARM64: BUILD SUCCEEDED.
+  https://github.com/ciescobar/videocall-ios/actions/runs/43642129191
+  Código: 9906735b2ecf5a74fc05911e58d5d4c483fa16d1.
+- 40 comprobaciones Swift aprobadas: ausencia y conversión de ángulos, postura
+  natural, perfiles extremos, espejo, encuadre, espera con saltos breves,
+  exclusión del tiempo inválido y reinicios por interrupciones prolongadas.
+- Validación Windows aprobada: sintaxis, interoperabilidad real con Java/Android
+  y comprobación de bibliotecas nativas. No sustituye una prueba de cámara.
+- IPA verificado: 0.1.2 build 3, ARM64, CRC, permisos, modelo y WebRTC.
+  Tamaño: 50,507,021 bytes.
+  SHA256: 70eaae4a2f35f46f9aa59cb9729cd84e41f309ac9970cbac97ac88cb285bbce5
+La facilidad real del registro y la primera captura quedan pendientes de la
+prueba física del usuario. No se declaran llamadas Apple-Android verificadas.
+
+ACTUALIZACIÓN
+Usar distribucion/VideoCall-iPad-0.1.2-sin-firma.ipa en Sideloadly, con el mismo
+iPad, la misma cuenta Apple y las opciones que funcionaron previamente.
+No desinstalar la app ni borrar el perfil para actualizar. No hay que instalar
+0.1.1 antes: 0.1.2 incorpora la guía de esa versión y estas correcciones.
+Las versiones y el APK Android permanecen intactos. Respaldo OneDrive conservado.

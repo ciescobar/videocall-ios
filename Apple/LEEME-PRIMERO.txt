@@ -1,11 +1,12 @@
-VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.1
+VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.2
 14 de noviembre de 2026
 
-ACTUALIZACIÓN 0.1.1
-Consultar NOVEDADES-0.1.1.txt para los cambios y la validación vigente.
-Guía facial animada, encuadre equivalente a Android y selfie ajustada.
+ACTUALIZACIÓN 0.1.2
+Consultar NOVEDADES-0.1.2.txt para los cambios y la validación vigente.
+Captura automática con lectura de ángulos corregida y adquisición más flexible.
+Conserva la guía facial animada y el ajuste de selfie de 0.1.1.
 Actualizar mediante Sideloadly con la misma cuenta, sin desinstalar la app.
-El usuario confirmó que pudo abrir 0.1.0. Falta probar físicamente 0.1.1.
+El usuario confirmó que pudo abrir la app. Falta probar físicamente 0.1.2.
 
 HISTORIAL DE LA PRIMERA VERSIÓN
 Se preparó el código nativo para llamadas con Android y registro facial completo.
