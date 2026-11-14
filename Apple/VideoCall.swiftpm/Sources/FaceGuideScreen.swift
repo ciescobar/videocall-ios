@@ -68,7 +68,7 @@ struct FaceCameraView: View {
                     Text(feedback.testStatus == 3 ? "USUARIO IDENTIFICADO" : feedback.testStatus == 2 ? "Confirmando coincidencia…" : feedback.testStatus == 1 ? "Rostro no reconocido" : "Coloca un rostro frente a la cámara")
                         .font(.headline).foregroundStyle(feedback.testStatus == 3 ? MIBrand.good : feedback.testStatus == 1 ? MIBrand.warning : MIBrand.text)
                     if feedback.testStatus == 3 { Text(feedback.testName).font(.title3.bold()) }
-                    Text("Comprobación local; no modifica el perfil ni autoriza llamadas.").font(.caption2).foregroundStyle(.secondary)
+                    Text("Solo compara con el perfil guardado en este equipo.").font(.caption2).foregroundStyle(.secondary)
                 }.multilineTextAlignment(.center).padding(12).frame(maxWidth: .infinity)
                     .background(MIBrand.surface, in: RoundedRectangle(cornerRadius: 12))
             }
@@ -91,7 +91,7 @@ struct FaceCameraView: View {
                 }.font(.caption.weight(.medium))
                 ProgressView(value: feedback.good ? feedback.hold : Double(feedback.score) / 100)
                     .tint(faceMint).animation(.linear(duration: 0.1), value: feedback.hold)
-                Text("La foto se toma sola. No necesitas llenar el óvalo ni llegar a 100. Sigue las flechas con giros pequeños.")
+                Text(feedback.isUserTest ? "Mira de frente. Dos coincidencias seguidas confirman el perfil. Puedes cambiar de rostro; no se guardan las fotos de esta prueba." : "La foto se toma sola. No necesitas llenar el óvalo ni llegar a 100. Sigue las flechas con giros pequeños.")
                     .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
             }
             Button(action: capture.toggleMirror) {

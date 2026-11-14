@@ -78,7 +78,7 @@ struct RootView: View {
                     Button(action: state.startUserTest) { Label("USER TEST", systemImage: "person.crop.rectangle.badge.checkmark") }
                         .buttonStyle(.borderedProminent).foregroundStyle(MIBrand.onPrimary)
                     Text("Prueba rostros frente a la cámara. Compara únicamente con el perfil de este equipo.").font(.caption).foregroundStyle(.secondary)
-                }
+                }.listRowBackground(MIBrand.surface)
                 Section("Dispositivos disponibles · \(state.devices.count)") {
                     if state.devices.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
@@ -92,10 +92,10 @@ struct RootView: View {
                             Text(device.name).font(.headline); Spacer()
                             Button { state.dial(device, video: false) } label: { Image(systemName: "phone.fill").frame(width: 38, height: 45) }.accessibilityLabel("Llamar a \(device.name) con audio").buttonStyle(.borderless)
                             Button { state.dial(device, video: true) } label: { Image(systemName: "video.fill").frame(width: 38, height: 45) }.accessibilityLabel("Videollamada a \(device.name)").buttonStyle(.borderless)
-                        }.padding(.vertical, 7)
+                        }.padding(.vertical, 7).listRowBackground(MIBrand.surface)
                     }
                 }
-                Section { Text("Grupo público de prueba: los nombres de las instalaciones participantes son visibles para ellas. La verificación facial se realiza localmente; no acredita ante el otro equipo una identidad certificada.").font(.footnote).foregroundStyle(.secondary) }
+                Section { Text("Grupo público de prueba: los nombres de las instalaciones participantes son visibles para ellas. La verificación facial se realiza localmente; no acredita ante el otro equipo una identidad certificada.").font(.footnote).foregroundStyle(.secondary) }.listRowBackground(MIBrand.surface)
             }
             .scrollContentBackground(.hidden).background(appBackground)
             .navigationTitle("MI-DRIVER")
@@ -120,19 +120,19 @@ struct RootView: View {
             Form {
                 Section("Acerca de MI-DRIVER") {
                     Text(AppVersion.label).textSelection(.enabled)
-                }
+                }.listRowBackground(MIBrand.surface)
                 Section("Validación") {
                     Text(state.diagnostics).font(.footnote).textSelection(.enabled)
                     Button("Comprobar modelo facial") { state.testModel() }.disabled(state.call != nil || state.faceRequest != nil)
                     Toggle("Forzar TURN en la próxima llamada", isOn: $state.relayOnly).disabled(state.call != nil)
                     Text("Si TURN no responde, una llamada entre ciertas redes puede fallar. Comprueba la ruta en las estadísticas durante una llamada real.").font(.caption).foregroundStyle(.secondary)
                     Button("Conectar") { state.reconnect() }
-                }
+                }.listRowBackground(MIBrand.surface)
                 Section("Mi registro") {
                     Text("Cinco plantillas cifradas en este equipo. No se guardan fotografías ni se envían al servicio de señalización.").font(.footnote)
                     Button("Borrar mi registro facial", role: .destructive) { confirmDelete = true }.disabled(state.call != nil)
-                }
-            }.navigationTitle("Ajustes").toolbar { Button("Listo") { settings = false } }
+                }.listRowBackground(MIBrand.surface)
+            }.scrollContentBackground(.hidden).background(appBackground).navigationTitle("Ajustes").toolbar { Button("Listo") { settings = false } }
             .confirmationDialog("¿Borrar el registro facial de este iPad?", isPresented: $confirmDelete, titleVisibility: .visible) {
                 Button("Borrar registro", role: .destructive) { settings = false; state.deleteProfile() }
                 Button("Cancelar", role: .cancel) {}
