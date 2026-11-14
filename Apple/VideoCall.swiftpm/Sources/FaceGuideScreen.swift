@@ -103,13 +103,14 @@ struct FaceHalo: View {
     let mirrored: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion || feedback.fatal)) { _ in
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion || feedback.fatal)) { timeline in
             Canvas { context, size in
-                draw(context: &context, size: size, now: ProcessInfo.processInfo.systemUptime)
+                draw(context: &context, size: size, now: ProcessInfo.processInfo.systemUptime,
+                    animationTime: timeline.date.timeIntervalSinceReferenceDate)
             }
         }.accessibilityHidden(true)
     }
-    private func draw(context: inout GraphicsContext, size: CGSize, now: Double) {
+    private func draw(context: inout GraphicsContext, size: CGSize, now: Double, animationTime: Double) {
         guard size.width > 0, size.height > 0 else { return }
         // Match AVCaptureVideoPreviewLayer.resizeAspect, including letterboxing.
         let aspect = max(0.1, feedback.imageAspect)
@@ -120,7 +121,7 @@ struct FaceHalo: View {
         let oh = min(ih * 0.84, ow * 1.32)
         let center = CGPoint(x: size.width / 2, y: size.height / 2)
         let oval = CGRect(x: center.x - ow / 2, y: center.y - oh / 2, width: ow, height: oh)
-        let t = reduceMotion ? 0 : now
+        let t = reduceMotion ? 0 : animationTime
         let pulse = 0.5 + 0.5 * sin(t * 2.6)
         let ink = feedback.good ? faceMint : faceBlue
         var shade = Path(CGRect(origin: .zero, size: size)); shade.addEllipse(in: oval)
