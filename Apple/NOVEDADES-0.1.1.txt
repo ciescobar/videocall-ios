@@ -1,0 +1,50 @@
+VIDEOCALL APPLE 0.1.1 · BUILD 2 · 14/11/2026
+
+IDENTIFICACIÓN FACIAL
+- Vista selfie ajustada horizontalmente, tanto en el registro como en la vista
+  propia de llamada. El botón de espejo permite alternarla y guarda la elección.
+- Óvalo animado de 72 segmentos, halo, rostro que demuestra el giro, flechas
+  móviles y seguimiento del rostro alineado con la cámara y el espejo.
+- Indicadores de centro, distancia e imagen, progreso durante la breve espera
+  de captura, confirmación visual y pitido. Diseño vertical y horizontal.
+- Fórmula de encuadre y giros leves equivalentes a Android 0.3.2. El indicador
+  anterior penalizaba demasiado los desplazamientos pequeños.
+- Análisis hasta cada 100 ms, según rendimiento, y 350 ms de posición correcta.
+- Se conservan modelo SFace, umbrales de coincidencia, consentimiento, cifrado
+  local y verificación antes de aceptar. No se guardan fotos.
+
+EVIDENCIA
+- Xcode ARM64: BUILD SUCCEEDED.
+  https://github.com/ciescobar/videocall-ios/actions/runs/43640464381
+  Código: 1f77e17919fed72d83898228cd5772f53ef557cc.
+- 29 comprobaciones Swift ejecutadas en macOS: giros, espejo, encuadre,
+  movimiento entre muestras, estabilidad, reinicios y entradas inválidas.
+- IPA verificado: versión interna 0.1.1, build 2, ARM64, CRC, permisos,
+  WebRTC, modelo SFace y tono de captura. Tamaño: 50,504,948 bytes.
+  SHA256: d40908e97bfe5138d2760d924250bce3917232521d4e3c2ed1434e4e19a85fbb
+- Validación Windows: sintaxis Swift, interoperabilidad real Java/Android de
+  señalización cifrada y comprobación de bibliotecas nativas.
+- La versión 0.1.0 fue firmada e instalada con Sideloadly y el usuario confirmó
+  que pudo abrirla. Esta versión 0.1.1 requiere instalarse y probarse físicamente:
+  selfie, registro, giro del iPad y llamadas con Android.
+- No se acredita precisión biométrica ni resistencia a fotos o videos.
+- Al preparar la actualización, Sideloadly dejó de detectar el iPad. Selector
+  abierto en distribucion; pendiente reconexión y selección manual del archivo.
+
+ACTUALIZAR
+1. Mantener instalada la app anterior para conservar el perfil.
+2. Seleccionar en Sideloadly VideoCall-iPad-0.1.1-sin-firma.ipa de distribucion.
+   Usar el mismo iPad, cuenta Apple y opciones que funcionaron para 0.1.0.
+   No cambiar el identificador de la app.
+3. Pulsar Start y esperar Done. Introducir personalmente la cuenta/verificación
+   si lo solicita. No se publican credenciales ni certificados personales.
+4. Abrir VideoCall y comprobar que el movimiento lateral coincide con la vista.
+   El botón Vista espejo/directa permite elegir la orientación más cómoda.
+   Probar la verificación existente; no hace falta borrar el perfil para ver
+   la guía nueva.
+5. Probar una llamada con Android, ambos visibles, uno por Wi-Fi y otro por
+   datos. La compilación no acredita el éxito de esa llamada.
+
+Se mantiene bundle ID com.mitech.videocall.applelab y el formato del perfil.
+El APK Android 0.3.2 y el respaldo OneDrive no se han modificado.
+El DNS Cloudflare del PC se mantiene por solicitud expresa del usuario.

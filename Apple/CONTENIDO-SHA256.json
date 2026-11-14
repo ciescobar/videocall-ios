@@ -30,11 +30,13 @@
   "Frameworks/onnxruntime.xcframework/ios-arm64_x86_64-simulator/onnxruntime.framework/Info.plist": "105a541238a323a158b6c0a1134d7c2b22da6a140f2ed48a2182ad2117e8f443",
   "Frameworks/onnxruntime.xcframework/ios-arm64_x86_64-simulator/onnxruntime.framework/Modules/module.modulemap": "7c3cfd13055e856d1eab520889fe221cf92a1c82cb58aee2d0f422c29ce0bcb5",
   "Frameworks/onnxruntime.xcframework/ios-arm64_x86_64-simulator/onnxruntime.framework/onnxruntime": "0ff57cfcae76956ba9e47a30104617b01257f8a3f41e5cf111515e2d40b7d001",
-  "Package.swift": "4e6dcc6f8752d5817b37a6f99f4e62b9643d08e620a17360786864ee3f9526a3",
+  "Package.swift": "cd330b02db0d280e39bf9e2436211f63c83d3a7cfcd9f02936644986069f2fbf",
   "Sources/AppResources.swift": "e24727d7622b0038c50e9fffd412c22e05fcbea1f2cadd9900b4f6507afdb60a",
   "Sources/AppState.swift": "efb2f283d8058cb63a725099760ba275c65df051ef7ec1229d5740b9a34235f2",
   "Sources/CallMedia.swift": "ed4ecd3aa552fb67ecc1e8fc768fd38c019e11280298b4bfa1dd09c5aed50542",
-  "Sources/FaceCapture.swift": "9dc31f9615bc356a9a06e8e8104db6ba04ab9d59bc2fcd30230173e8c17404ed",
+  "Sources/FaceCapture.swift": "060f1a44ffed935e03fdb266bff62321161024e9c5d2bb8377144a100a828544",
+  "Sources/FaceGuidance.swift": "a5d88cf335e4bcd7c4fe38cd677b93e03e9ce84d444ebea88a9b9f45abe25944",
+  "Sources/FaceGuideScreen.swift": "405c5888fa0b4db91176bfd3d95a14baa17cb68bbae4c8003c7e417ff9fc8e9b",
   "Sources/FaceModel.swift": "1a39060b7403d49439202669c69f16337256bf3370e9148ddb8ae2fdf5ad1cfb",
   "Sources/FaceRuntime.swift": "4828ebd0702b40df17bf987beac3e52570089831f023f5b40ab94a9b09705f59",
   "Sources/MQTTClient.swift": "6ec246a82fd86cb9d75915386b02d60c93841f856d284f01e38e499060b258b4",
@@ -46,5 +48,5 @@
   "Sources/Resources/sface.onnx": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
   "Sources/Resources/WEBRTC-LICENSE.txt": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482",
   "Sources/RoomCrypto.swift": "1a1d1565aaad8b15fafc6b7b517faf26743047b1674b9f2c5c46f3d6f7699ad2",
-  "Sources/VideoCallApp.swift": "b8e552b7004bbe6ee4faa02098fddb4f0d89d146c8c864348e93cfb0cfa03f20"
+  "Sources/VideoCallApp.swift": "96fa1c567cfc0cdfbd2669ae0442e790fb2e85770723ca29f4aae31095025816"
 }

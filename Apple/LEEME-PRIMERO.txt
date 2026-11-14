@@ -1,22 +1,31 @@
-VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.0
+VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.1
 14 de noviembre de 2026
 
-ESTADO REAL
+ACTUALIZACIÓN 0.1.1
+Consultar NOVEDADES-0.1.1.txt para los cambios y la validación vigente.
+Guía facial animada, encuadre equivalente a Android y selfie ajustada.
+Actualizar mediante Sideloadly con la misma cuenta, sin desinstalar la app.
+El usuario confirmó que pudo abrir 0.1.0. Falta probar físicamente 0.1.1.
+
+HISTORIAL DE LA PRIMERA VERSIÓN
 Se preparó el código nativo para llamadas con Android y registro facial completo.
 La compilación Xcode para iPad/iPhone ARM64 terminó correctamente en GitHub.
 Ejecución: https://github.com/ciescobar/videocall-ios/actions/runs/43632351817
 Código compilado: 557e6de098bdd6ecfc3cd3bb27a6267353a1be22.
 IPA: distribucion/VideoCall-iPad-0.1.0-sin-firma.ipa en el proyecto Windows.
-Todavía no está firmado ni instalado. No se han probado llamadas ni capturas en
-un iPad. El APK Android anterior permanece intacto.
+Sideloadly 0.72 completó la firma e instalación en el iPad (estado final Done).
+El IPA distribuido en esta carpeta sigue siendo el original sin firma; la firma
+personal se realizó en el PC durante la instalación. No se han probado todavía
+la apertura, las capturas ni las llamadas Apple. El APK Android permanece intacto.
 
 PRÓXIMO PASO: INSTALACIÓN DE PRUEBA GRATIS DESDE WINDOWS
 AltStore Classic/AltServer permite firmar e instalar IPAs con una cuenta Apple
 gratuita, con renovación cada siete días y hasta tres apps instaladas a la vez.
 Requiere preparar AltServer y componentes Apple en el PC, conectar y confiar en
 el iPad e introducir la cuenta Apple directamente en la herramienta de instalación.
-No se han instalado esos componentes ni cambiado ajustes del iPad en esta sesión.
-No se ha comprobado todavía la instalación de este IPA mediante esa vía.
+Se instalaron los componentes Apple y AltServer, pero AltServer falló con
+"The provided anisette data is invalid". Se instaló después Sideloadly 0.72,
+que completó la instalación del IPA. La apertura en el iPad está pendiente.
 Guía oficial: https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows
 Límites: https://faq.altstore.io/altstore-classic/your-altstore
 El IPA sin firma no se instala simplemente abriéndolo en Archivos.

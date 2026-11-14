@@ -1,4 +1,19 @@
-VIDEOCALL APPLE 0.1.0 - 14/11/2026
+ACTUALIZACIÓN 0.1.1: consultar NOVEDADES-0.1.1.txt para el estado vigente.
+El usuario confirmó que pudo abrir la versión 0.1.0 instalada con Sideloadly.
+
+HISTORIAL: VIDEOCALL APPLE 0.1.0 - 14/11/2026
+
+ACTUALIZACIÓN POSTERIOR: FIRMA E INSTALACIÓN COMPLETADAS
+- Sideloadly 0.72 reconoció el iPad por USB, firmó e instaló la app. Se observó
+  "Installing… VerifyingApplication" y después el estado final "Done.".
+- El IPA de distribución sigue sin firma: la firma personal se generó durante
+  esa instalación. No se publican certificados ni datos de la cuenta Apple.
+- AltServer había fallado con un error Anisette; Sideloadly inicialmente falló
+  por resolución DNS al descargar un componente oficial. Corregir esa conexión
+  permitió avanzar. El IPA fue verificado otra vez por SHA256, CRC y ARM64.
+- Pendientes: abrir VideoCall, permisos, confianza/modo desarrollador si se
+  requieren, registro facial guiado, verificación y llamadas reales con Android.
+- Este estado sustituye los puntos anteriores que indicaban instalación pendiente.
 
 ACTUALIZACIÓN: COMPILACIÓN APPLE APROBADA EN GITHUB
 Esta sección sustituye los estados anteriores de compilación pendiente.
