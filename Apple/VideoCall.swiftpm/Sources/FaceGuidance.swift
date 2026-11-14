@@ -7,7 +7,9 @@ struct FaceAngles {
     static func radians(yaw: Double?, pitch: Double?, roll: Double?) -> FaceAngles? {
         guard let yaw = yaw, let pitch = pitch, let roll = roll,
               [yaw, pitch, roll].allSatisfy({ $0.isFinite }) else { return nil }
-        return FaceAngles(yaw: yaw * 180 / .pi, pitch: pitch * 180 / .pi, roll: roll * 180 / .pi)
+        // Vision's positive pitch means nodding DOWN (VNObservation.h).
+        // Our guide uses positive pitch for chin UP; normalize exactly once here.
+        return FaceAngles(yaw: yaw * 180 / .pi, pitch: -pitch * 180 / .pi, roll: roll * 180 / .pi)
     }
 }
 

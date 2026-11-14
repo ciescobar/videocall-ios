@@ -9,6 +9,16 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - name: Comprobar sentido vertical en el SDK Apple
+        run: |
+          python3 - <<'PY'
+          import pathlib, subprocess
+          sdk = pathlib.Path(subprocess.check_output(['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'], text=True).strip())
+          header = sdk / 'System/Library/Frameworks/Vision.framework/Headers/VNObservation.h'
+          text = header.read_text()
+          assert 'positive angle corresponds to nodding head down direction' in text
+          print('PASS: Apple SDK confirms Vision positive pitch means nodding DOWN')
+          PY
       - name: Comprobar reglas de captura y espejo
         run: |
           swiftc Apple/VideoCall.swiftpm/Sources/FaceGuidance.swift Apple/Tests/FaceGuidanceChecks.swift -o /tmp/videocall-face-checks

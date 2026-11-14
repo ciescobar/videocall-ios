@@ -14,8 +14,9 @@ import Foundation
         check(!FacePose.front.accepts(yaw: 0, pitch: 0, roll: .infinity), "Infinity rejected")
         check(FaceAngles.radians(yaw: 0, pitch: nil, roll: 0) == nil, "Missing pitch never becomes fake zero/999")
         check(FaceAngles.radians(yaw: .nan, pitch: 0, roll: 0) == nil, "Invalid detector angles rejected")
-        let angles = FaceAngles.radians(yaw: .pi / 18, pitch: .pi / 10, roll: 0)!
-        check(abs(angles.yaw - 10) < 0.001 && abs(angles.pitch - 18) < 0.001, "Detector radians converted to degrees")
+        let converted = FaceAngles.radians(yaw: .pi / 18, pitch: .pi / 10, roll: 0)!
+        check(abs(converted.yaw - 10) < 0.001 && abs(converted.pitch + 18) < 0.001, "Vision downward pitch converted to guide-negative degrees")
+        let angles = FaceAngles(yaw: 10, pitch: 18, roll: 0)
         check(FacePose.up.accepts(yaw: 10, pitch: 24, roll: 0, relativeTo: angles), "Small upward turn relative to natural posture")
         check(FacePose.down.accepts(yaw: 10, pitch: 12, roll: 0, relativeTo: angles), "Small downward turn relative to natural posture")
         check(!FacePose.up.accepts(yaw: 10, pitch: 18, roll: 0, relativeTo: angles), "Neutral posture cannot satisfy upward gesture")
@@ -27,6 +28,19 @@ import Foundation
         check(FacePose.left.direction(mirrored: true).x == -1, "Left-pose mirror cue")
         check(FacePose.right.direction(mirrored: false).x == -1, "Right-pose direct cue")
         check(FacePose.up.direction(mirrored: true).y == -1, "Up remains up")
+        let chinUp = FaceAngles.radians(yaw: 0, pitch: -.pi / 18, roll: 0)!
+        let chinDown = FaceAngles.radians(yaw: 0, pitch: .pi / 18, roll: 0)!
+        check(FacePose.up.accepts(yaw: chinUp.yaw, pitch: chinUp.pitch, roll: chinUp.roll), "Raw Vision UP activates UP guide")
+        check(!FacePose.down.accepts(yaw: chinUp.yaw, pitch: chinUp.pitch, roll: chinUp.roll), "Raw Vision UP cannot satisfy DOWN")
+        check(FacePose.down.accepts(yaw: chinDown.yaw, pitch: chinDown.pitch, roll: chinDown.roll), "Raw Vision DOWN activates DOWN guide")
+        check(!FacePose.up.accepts(yaw: chinDown.yaw, pitch: chinDown.pitch, roll: chinDown.roll), "Raw Vision DOWN cannot satisfy UP")
+        check(FacePose.up.moved(from: .front, yaw: 0, pitch: chinUp.pitch, previousYaw: 0, previousPitch: 0), "Raw UP satisfies upward transition")
+        check(FacePose.down.moved(from: .up, yaw: 0, pitch: chinDown.pitch, previousYaw: 0, previousPitch: chinUp.pitch), "Raw DOWN satisfies downward transition")
+        check(FacePose.front.moved(from: .down, yaw: 0, pitch: 0, previousYaw: 0, previousPitch: chinDown.pitch), "Return from DOWN to front uses normalized sign")
+        for mirror in [false, true] {
+            check(FacePose.up.direction(mirrored: mirror).y == -1 && FacePose.down.direction(mirrored: mirror).y == 1,
+                "Selfie mirror never reverses vertical gestures")
+        }
         let perfect = FaceFraming.evaluate(left: 91.2, top: 130, right: 388.8, bottom: 510, width: 480, height: 640)
         check(perfect.score == 100 && perfect.centered && perfect.distance && perfect.inside, "Android ideal framing")
         let offset = FaceFraming.evaluate(left: 139.2, top: 130, right: 436.8, bottom: 510, width: 480, height: 640)
