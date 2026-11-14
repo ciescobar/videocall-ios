@@ -36,7 +36,7 @@
   "Sources/CallMedia.swift": "ed4ecd3aa552fb67ecc1e8fc768fd38c019e11280298b4bfa1dd09c5aed50542",
   "Sources/FaceCapture.swift": "9dc31f9615bc356a9a06e8e8104db6ba04ab9d59bc2fcd30230173e8c17404ed",
   "Sources/FaceModel.swift": "1a39060b7403d49439202669c69f16337256bf3370e9148ddb8ae2fdf5ad1cfb",
-  "Sources/FaceRuntime.swift": "216e5dd34b3980fae8f511f69db6710c253b87a04fb922ee1d35c9df96c74257",
+  "Sources/FaceRuntime.swift": "4828ebd0702b40df17bf987beac3e52570089831f023f5b40ab94a9b09705f59",
   "Sources/MQTTClient.swift": "6ec246a82fd86cb9d75915386b02d60c93841f856d284f01e38e499060b258b4",
   "Sources/Resources/capture.wav": "8c53d5eade96102dc2c6923a2d060a0f444a1da178d20cb6333e25e29b7698b6",
   "Sources/Resources/FACE-MODEL-NOTICE.txt": "736aa8b0e995bc68093a8f6908eaf52944727082b6ad92fcce373f78d910d374",
@@ -46,5 +46,5 @@
   "Sources/Resources/sface.onnx": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
   "Sources/Resources/WEBRTC-LICENSE.txt": "ab00a482b6a3902e40211b43c5d0441962ea99b6cc7c25c0f243fa270b78d482",
   "Sources/RoomCrypto.swift": "1a1d1565aaad8b15fafc6b7b517faf26743047b1674b9f2c5c46f3d6f7699ad2",
-  "Sources/VideoCallApp.swift": "ac6f3b4bd773c3a44615944a4b3b30e865827e857969db72fc41e4a3c1e7ab77"
+  "Sources/VideoCallApp.swift": "b8e552b7004bbe6ee4faa02098fddb4f0d89d146c8c864348e93cfb0cfa03f20"
 }

@@ -3,8 +3,23 @@ VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.0
 
 ESTADO REAL
 Se preparó el código nativo para llamadas con Android y registro facial completo.
-No hay todavía una app Apple compilada, firmada o instalada. No se han probado
-llamadas ni capturas en un iPad. El APK Android anterior permanece intacto.
+La compilación Xcode para iPad/iPhone ARM64 terminó correctamente en GitHub.
+Ejecución: https://github.com/ciescobar/videocall-ios/actions/runs/43632351817
+Código compilado: 557e6de098bdd6ecfc3cd3bb27a6267353a1be22.
+IPA: distribucion/VideoCall-iPad-0.1.0-sin-firma.ipa en el proyecto Windows.
+Todavía no está firmado ni instalado. No se han probado llamadas ni capturas en
+un iPad. El APK Android anterior permanece intacto.
+
+PRÓXIMO PASO: INSTALACIÓN DE PRUEBA GRATIS DESDE WINDOWS
+AltStore Classic/AltServer permite firmar e instalar IPAs con una cuenta Apple
+gratuita, con renovación cada siete días y hasta tres apps instaladas a la vez.
+Requiere preparar AltServer y componentes Apple en el PC, conectar y confiar en
+el iPad e introducir la cuenta Apple directamente en la herramienta de instalación.
+No se han instalado esos componentes ni cambiado ajustes del iPad en esta sesión.
+No se ha comprobado todavía la instalación de este IPA mediante esa vía.
+Guía oficial: https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows
+Límites: https://faq.altstore.io/altstore-classic/your-altstore
+El IPA sin firma no se instala simplemente abriéndolo en Archivos.
 
 IMPORTANTE SOBRE SWIFT PLAYGROUND
 El paquete VideoCall.swiftpm contiene dependencias nativas binarias: WebRTC y
@@ -63,8 +78,11 @@ Ambos flujos generan el proyecto con XcodeGen y comprueban la compilación para 
 iPad real con la firma desactivada. Esto verifica código y enlace, NO instalación.
 Los límites gratuitos pueden cambiar; comprobarlos antes de activar facturación.
 Para obtener una app firmada instalable con Codemagic o distribuir por TestFlight
-se requiere la cuenta Apple Developer correspondiente. No se han pedido claves,
-pagado servicios, creado repositorios ni subido este proyecto a ningún servicio.
+se requiere la cuenta Apple Developer correspondiente. Para pruebas personales
+existe la alternativa gratuita AltStore descrita arriba, con sus restricciones.
+El usuario creó ciescobar/videocall-ios público y autorizó Git Credential Manager;
+se subió el proyecto y se ejecutó la compilación gratuita. No se pidieron claves
+por el chat ni se activaron servicios de pago. No se usó todavía una cuenta Apple.
 
 EN UN MAC CON XCODE
 Con XcodeGen instalado, abrir Terminal dentro de Apple y ejecutar:

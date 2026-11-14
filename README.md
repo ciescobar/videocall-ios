@@ -2,7 +2,7 @@
 
 Primera versión nativa de validación para llamadas con Android y registro facial local guiado.
 
-Estado: fuentes preparadas; compilación Apple y pruebas físicas pendientes. La comprobación facial es experimental; no acredita identidad certificada ni resistencia a fotos o videos. Las plantillas permanecen cifradas en el dispositivo. No se incluyen datos biométricos de personas en este repositorio.
+Estado: compilación Xcode ARM64 aprobada en [GitHub Actions](https://github.com/ciescobar/videocall-ios/actions/runs/43632351817), código 557e6de. IPA generado sin firma; instalación y pruebas físicas pendientes. La comprobación facial es experimental; no acredita identidad certificada ni resistencia a fotos o videos. Las plantillas permanecen cifradas en el dispositivo. No se incluyen datos biométricos de personas en este repositorio.
 
 Consultar [instrucciones](Apple/LEEME-PRIMERO.txt) y [validación](Apple/VALIDACION-IPAD.txt).
 

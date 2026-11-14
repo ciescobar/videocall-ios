@@ -1,5 +1,29 @@
 VIDEOCALL APPLE 0.1.0 - 14/11/2026
 
+ACTUALIZACIÓN: COMPILACIÓN APPLE APROBADA EN GITHUB
+Esta sección sustituye los estados anteriores de compilación pendiente.
+- Repositorio público creado por el usuario: https://github.com/ciescobar/videocall-ios
+- Git Credential Manager autorizado por el usuario; subida inicial completada.
+- Xcode generó y compiló la app ARM64 correctamente: BUILD SUCCEEDED.
+  https://github.com/ciescobar/videocall-ios/actions/runs/43632351817
+  Código: 557e6de098bdd6ecfc3cd3bb27a6267353a1be22.
+- Se corrigieron un mensaje C opcional de ONNX Runtime y una colisión de nombre
+  del color de fondo con el método background de SwiftUI, detectados por Xcode.
+- IPA descargado de ese resultado y verificado: CRC ZIP, Mach-O ARM64, bundle ID,
+  permisos de cámara/micrófono, familias iPhone/iPad, modelo y framework WebRTC.
+  iOS mínimo: 17.0. Tamaño IPA: 50,447,720 bytes.
+  SHA256 IPA: c1394cf6ee0c96422d1f41d8ddd5487f360007f4f40a52cdab1acd581e7eda70
+- No incluye perfil de aprovisionamiento. No está firmado para un iPad real.
+- No se han probado ejecución, cámara, biometría, audio/video, MQTT ni TURN en Apple.
+- La compilación se hizo con el proyecto Xcode generado, NO con Swift Playground.
+- Para pruebas personales existe AltStore Classic con cuenta Apple gratuita y
+  renovación cada siete días. No se ha instalado ni probado todavía esa vía.
+  https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows
+- La detección USB de Windows mostró Apple iPad y Apple Mobile Device USB
+  Composite Device en estado OK. Eso no acredita instalación ni acceso a su cámara.
+
+HISTORIAL DE PREPARACIÓN Y COMPROBACIONES WINDOWS (ANTERIOR A LA COMPILACIÓN):
+
 Comprobado en Windows:
 - Analizador de sintaxis Swift: diez archivos, sin errores de sintaxis.
   No equivale a validación de tipos ni compilación con el SDK Apple.
