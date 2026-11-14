@@ -1,12 +1,17 @@
-VIDEOCALL PARA IPAD / IPHONE - FUENTES 0.1.2
+MI-DRIVER PARA IPAD / IPHONE - FUENTES 0.1.3
 14 de noviembre de 2026
 
-ACTUALIZACIÓN 0.1.2
-Consultar NOVEDADES-0.1.2.txt para los cambios y la validación vigente.
+ACTUALIZACIÓN 0.1.3
+Consultar NOVEDADES-0.1.3.txt para los cambios y la validación vigente.
+Versión y compilación visibles en inicio, registro facial, dispositivos y Ajustes.
+Marca, icono y paleta de YMODEMUPLOADER. USER TEST disponible tras identificarse:
+dos coincidencias frontales muestran USUARIO IDENTIFICADO y el nombre local.
+Los gestos arriba/abajo de Vision están corregidos y comprobados con el SDK.
 Captura automática con lectura de ángulos corregida y adquisición más flexible.
 Conserva la guía facial animada y el ajuste de selfie de 0.1.1.
 Actualizar mediante Sideloadly con la misma cuenta, sin desinstalar la app.
-El usuario confirmó que pudo abrir la app. Falta probar físicamente 0.1.2.
+Archivo vigente: distribucion/MI-DRIVER-iPad-0.1.3-sin-firma.ipa.
+El usuario confirmó que terminó de instalar 0.1.2. Falta probar físicamente 0.1.3.
 
 HISTORIAL DE LA PRIMERA VERSIÓN
 Se preparó el código nativo para llamadas con Android y registro facial completo.

@@ -1,0 +1,62 @@
+MI-DRIVER APPLE 0.1.3 · BUILD 4 · 14/11/2026
+
+IDENTIDAD MI-DRIVER
+Nombre visible MI-DRIVER, icono MI y logotipos diurno/nocturno del proyecto
+YMODEMUPLOADER. Azul #001D5F, naranja #FF6600 y fondo #F2F3F5; variantes
+nocturnas de la misma referencia. Esa carpeta se leyó, no se modificó.
+Se conservan los identificadores internos y los perfiles existentes.
+
+USER TEST
+Botón disponible después de completar la identificación inicial. Prueba frontal
+continua del rostro contra el único perfil registrado en ese dispositivo.
+Dos coincidencias consecutivas muestran USUARIO IDENTIFICADO y su nombre.
+Un rostro distinto, falta de rostro o resultado obsoleto retira la indicación.
+Puede cerrarse para volver a dispositivos. No guarda las fotos ni cambia el
+perfil, la autorización de entrada o la aceptación de llamadas. Las llamadas
+entrantes reciben ocupado mientras la cámara está en esta prueba.
+
+VERSIÓN VISIBLE
+La pantalla inicial, el consentimiento del registro, la cámara de identificación,
+la lista de dispositivos y Ajustes muestran la versión y la compilación.
+Texto previsto de este paquete: Versión 0.1.3 · compilación 4.
+
+La etiqueta lee CFBundleShortVersionString y CFBundleVersion del paquete que
+está ejecutándose. No se usa un número fijo escrito en la interfaz. Si una
+herramienta de firma cambia esos campos, se mostrarán los valores instalados.
+
+ARRIBA Y ABAJO
+El usuario detectó posible inversión en los gestos verticales. Se confirmó en
+VNObservation.h que el pitch positivo de Vision representa bajar la cabeza;
+la guía interpretaba ese signo como levantarla. Se normaliza el signo una sola
+vez al convertir desde Vision, antes de calibración, aceptación y movimiento.
+Las flechas verticales no se invierten al activar espejo. Pruebas específicas
+ejercitan el recorrido desde los valores de Vision hasta el gesto aceptado.
+El flujo de compilación comprueba la convención en el propio SDK Apple.
+Referencia del encabezado Apple consultado, conservado en un espejo del SDK:
+https://raw.githubusercontent.com/xybp888/iOS-SDKs/master/iPhoneOS18.0.sdk/System/Library/Frameworks/Vision.framework/Headers/VNObservation.h
+
+Se conservan las correcciones de captura automática de 0.1.2 y el perfil local.
+No se modificaron los umbrales de comparación del modelo facial.
+Android 0.3.3 incorpora también la marca, la versión visible, la captura más
+flexible y USER TEST. Se mantienen cinco muestras, consentimiento, cifrado y
+comprobación obligatoria al entrar y antes de contestar.
+
+VALIDACIÓN
+- Xcode ARM64: BUILD SUCCEEDED.
+  https://github.com/ciescobar/videocall-ios/actions/runs/43646076581
+  Código: 3ce160a59dd173525333d2c83af089a84ce403f8.
+- 59 comprobaciones Swift aprobadas, incluida la conversión vertical desde
+  Vision, espejo, encuadre, espera tolerante y confirmación/expiración USER TEST.
+- Convención de pitch contrastada automáticamente con el SDK Apple del runner.
+- IPA 0.1.3 build 4 verificado: ARM64, CRC, nombre MI-DRIVER, catálogo/icono,
+  permisos, SFace idéntico a Android y WebRTC embebido. 51,158,375 bytes.
+  SHA256: dc3ea442c84477d58b9cb07bc20da7fd1a51258c2868bcd7e3347bc32b54080f
+El usuario confirmó que terminó la instalación anterior; Sideloadly mostró
+100 % y Done para 0.1.2. La apertura y la prueba física de 0.1.3 están pendientes.
+
+ACTUALIZAR
+En Sideloadly elegir distribucion/MI-DRIVER-iPad-0.1.3-sin-firma.ipa, mantener
+la misma cuenta Apple y pulsar Start. No desinstalar la app anterior.
+Después abrir MI-DRIVER y leer la versión en la pantalla, antes de registrarse.
+La distribución a compañeros por TestFlight/web se aplazó por decisión del
+usuario: se terminan primero las apps nativas. No hay enlace TestFlight creado.
