@@ -23,6 +23,13 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild -project VideoCall.xcodeproj -scheme VideoCall -configuration Debug -destination 'generic/platform=iOS' -derivedDataPath ../build-ios CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build-device.log
+      - name: Empaquetar IPA sin firma
+        shell: bash
+        run: |
+          mkdir -p unsigned/Payload
+          ditto build-ios/Build/Products/Debug-iphoneos/VideoCall.app unsigned/Payload/VideoCall.app
+          cd unsigned
+          /usr/bin/zip -qry ../VideoCall-iPad-0.1.0-sin-firma.ipa Payload
       - name: Guardar informe
         if: always()
         uses: actions/upload-artifact@v4
@@ -30,9 +37,9 @@ jobs:
           name: Informe-iOS
           path: Apple/*.log
           retention-days: 7
-      - name: Guardar app sin firma (no instalable)
+      - name: Guardar IPA pendiente de firma
         uses: actions/upload-artifact@v4
         with:
           name: VideoCall-iOS-sin-firma
-          path: build-ios/Build/Products/Debug-iphoneos/VideoCall.app
+          path: VideoCall-iPad-0.1.0-sin-firma.ipa
           retention-days: 7

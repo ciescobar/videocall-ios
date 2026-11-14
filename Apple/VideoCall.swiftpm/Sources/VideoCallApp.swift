@@ -16,7 +16,7 @@ struct VideoCallApp: App {
 }
 
 private let mint = Color(red: 0.25, green: 0.91, blue: 0.70)
-private let background = Color(red: 0.035, green: 0.075, blue: 0.10)
+private let appBackground = Color(red: 0.035, green: 0.075, blue: 0.10)
 
 struct RootView: View {
     @EnvironmentObject var state: AppState
@@ -24,7 +24,7 @@ struct RootView: View {
     @State private var confirmDelete = false
     var body: some View {
         ZStack {
-            background.ignoresSafeArea()
+            appBackground.ignoresSafeArea()
             if let call = state.call {
                 if let media = state.media { ActiveCallView(session: call, media: media) }
                 else { ringing(call) }
@@ -86,7 +86,7 @@ struct RootView: View {
                 }
                 Section { Text("Grupo público de prueba: los nombres de las instalaciones participantes son visibles para ellas. La verificación facial se realiza localmente; no acredita ante el otro equipo una identidad certificada.").font(.footnote).foregroundStyle(.secondary) }
             }
-            .scrollContentBackground(.hidden).background(background)
+            .scrollContentBackground(.hidden).background(appBackground)
             .navigationTitle("VideoCall")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { settings = true } label: { Image(systemName: "gearshape") }.accessibilityLabel("Ajustes") } }
         }
@@ -213,7 +213,7 @@ struct FaceFlowView: View {
     @State private var capture: FaceCapture?
     var body: some View {
         ZStack {
-            background.ignoresSafeArea()
+            appBackground.ignoresSafeArea()
             if let capture = capture { FaceCameraView(capture: capture, cancel: state.cancelFace) }
             else {
                 ScrollView {
