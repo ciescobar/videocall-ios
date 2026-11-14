@@ -15,6 +15,7 @@ struct FaceFeedback {
     var centered = false
     var distance = false
     var imageGood = false
+    var poseGood = false
     var faceRect = CGRect.zero
     var imageAspect: CGFloat = 0.75
     var observedAt = 0.0
@@ -51,6 +52,7 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private var stickyUntil: TimeInterval = 0
     private var stickyText = ""
     private var previousPose: FacePose?
+    private var neutral: FaceAngles?
     private var previousYaw: Double = 0
     private var previousPitch: Double = 0
     private var failures = 0
@@ -94,10 +96,10 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private func configure() throws {
         guard !configured else { return }
         session.beginConfiguration(); defer { session.commitConfiguration() }
-        session.sessionPreset = .vga640x480
         guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else { throw LabError.message("No hay cámara frontal disponible.") }
         let input = try AVCaptureDeviceInput(device: camera)
         guard session.canAddInput(input) else { throw LabError.message("La cámara está ocupada.") }; session.addInput(input)
+        session.sessionPreset = session.canSetSessionPreset(.hd1280x720) ? .hd1280x720 : .vga640x480
         let out = AVCaptureVideoDataOutput(); out.alwaysDiscardsLateVideoFrames = true
         out.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
         out.setSampleBufferDelegate(self, queue: queue)
@@ -123,37 +125,56 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         var f = FaceFeedback(); f.pose = steps[samples.count]; f.accepted = samples.count; f.total = steps.count
         f.imageAspect = CGFloat(image.width) / CGFloat(image.height); f.capturedAt = capturedAt
         do {
-            let request = VNDetectFaceLandmarksRequest()
-            try VNImageRequestHandler(cgImage: image, orientation: .up, options: [:]).perform([request])
-            guard let faces = request.results, faces.count == 1, let face = faces.first else {
+            // Ask the rectangle detector explicitly for the revision that estimates pitch.
+            // A landmarks-only request can return nil angles; never replace nil with 999 or zero.
+            let detector = VNDetectFaceRectanglesRequest()
+            detector.revision = VNDetectFaceRectanglesRequestRevision3
+            let handler = VNImageRequestHandler(cgImage: image, orientation: .up, options: [:])
+            try handler.perform([detector])
+            guard let faces = detector.results, faces.count == 1, let detected = faces.first else {
                 stability.reset(); f.text = "Muestra un solo rostro, completo y con buena luz."; publish(f); return
             }
-            let yaw = (face.yaw?.doubleValue ?? 999) * 180 / .pi
-            let pitch = (face.pitch?.doubleValue ?? 999) * 180 / .pi
-            let roll = (face.roll?.doubleValue ?? 999) * 180 / .pi
-            f.yaw = yaw; f.pitch = pitch
+            let request = VNDetectFaceLandmarksRequest()
+            request.revision = VNDetectFaceLandmarksRequestRevision3
+            request.inputFaceObservations = [detected]
+            try handler.perform([request])
+            guard let face = request.results?.first else {
+                stability.reset(); f.text = "Mira a la cámara para localizar ojos, nariz y boca."; publish(f); return
+            }
             let w = CGFloat(image.width), h = CGFloat(image.height), side = min(w, h)
             let rect = CGRect(x: face.boundingBox.minX * w, y: (1 - face.boundingBox.maxY) * h,
                 width: face.boundingBox.width * w, height: face.boundingBox.height * h)
-            let dx = abs(rect.midX - w / 2) / side, dy = abs(rect.midY - h / 2) / side, size = rect.width / side
+            let size = rect.width / side
             let framing = FaceFraming.evaluate(left: Double(rect.minX), top: Double(rect.minY),
                 right: Double(rect.maxX), bottom: Double(rect.maxY), width: Double(w), height: Double(h))
             f.score = framing.score; f.centered = framing.centered && framing.inside
-            f.distance = framing.distance && rect.width >= 120 && rect.height >= 120
+            f.distance = framing.distance && rect.width >= 96 && rect.height >= 96
             f.seen = true; f.observedAt = now
             f.faceRect = CGRect(x: rect.minX / w, y: rect.minY / h, width: rect.width / w, height: rect.height / h)
             var hint: String?
-            if rect.width < 120 || rect.height < 120 || size < 0.35 { hint = "Acércate un poco." }
-            else if size > 0.88 || rect.width > w * 0.94 || rect.height > h * 0.95 { hint = "Aléjate un poco." }
-            else if dx > 0.25 || dy > 0.28 || rect.minX < 4 || rect.minY < 4 || rect.maxX > w - 4 || rect.maxY > h - 4 { hint = "Centra todo el rostro en la vista." }
+            if !f.distance && (rect.width < 96 || rect.height < 96 || size < 0.22) { hint = "Acércate un poco: basta con que se vea bien tu rostro." }
+            else if size > 0.90 || rect.width > w * 0.96 || rect.height > h * 0.96 { hint = "Aléjate un poco." }
+            else if !framing.centered || !framing.inside { hint = "Lleva el rostro hacia el centro; no hace falta llenar el óvalo." }
             else { hint = quality(buffer, rect: rect) }
             f.imageGood = hint == nil
-            if hint == nil && !f.pose.accepts(yaw: yaw, pitch: pitch, roll: roll) { hint = abs(roll) > 22 ? "Mantén la cabeza vertical." : f.pose.title + ". Basta un giro leve." }
-            if hint == nil && !moved(yaw, pitch) { hint = "Mueve un poco la cabeza hacia la nueva posición." }
-            if let hint = hint {
-                stability.reset(); f.text = now < stickyUntil ? stickyText : hint; publish(f); return
+            guard let angles = FaceAngles.radians(yaw: detected.yaw?.doubleValue ?? face.yaw?.doubleValue,
+                pitch: detected.pitch?.doubleValue ?? face.pitch?.doubleValue,
+                roll: detected.roll?.doubleValue ?? face.roll?.doubleValue) else {
+                stability.reset(); f.text = hint ?? "Todavía no leo la inclinación: mira a la cámara, con ojos y nariz visibles."
+                publish(f); return
             }
-            f.good = true; f.text = "Vas bien · mantén la posición un instante"
+            let yaw = angles.yaw, pitch = angles.pitch, roll = angles.roll
+            f.yaw = yaw; f.pitch = pitch
+            f.poseGood = f.pose.accepts(yaw: yaw, pitch: pitch, roll: roll, relativeTo: neutral) && moved(yaw, pitch)
+            if hint == nil && !f.pose.accepts(yaw: yaw, pitch: pitch, roll: roll, relativeTo: neutral) {
+                hint = abs(roll) > 28 ? "Endereza un poco la cabeza." : f.pose.title + ". Un movimiento pequeño es suficiente."
+            }
+            if hint == nil && !moved(yaw, pitch) { hint = "Sigue un poco la flecha; la foto se toma sola." }
+            if let hint = hint {
+                _ = stability.observe(at: now, good: false); f.hold = stability.progress
+                f.text = now < stickyUntil ? stickyText : hint; publish(f); return
+            }
+            f.good = true; f.text = "¡Así está bien! Tomando foto automáticamente…"
             let ready = stability.observe(at: now, good: true); f.hold = stability.progress
             guard ready else { publish(f); return }
             guard let model = model else { return }
@@ -165,13 +186,14 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                         UserDefaults.standard.set(Date().timeIntervalSince1970 + 30, forKey: "faceCooldown")
                         publishError("No coincide con el registro. Espera 30 segundos antes de repetir."); shutdown(); return
                     }
-                    stickyText = "No coincide todavía. Mira de frente, mejora la luz y gira menos."
+                    stickyText = "No coincide todavía. Mejora la luz y repite el pequeño giro indicado."
                     stickyUntil = now + 2.2; f.text = stickyText; f.good = false; pauseUntil = now + 0.45; publish(f); return
                 }
             } else if let first = samples.first, FaceMath.cosine(first, vector) < 0.42 {
                 stability.reset(); stickyText = "Gira menos: repetiremos solo esta posición."
                 stickyUntil = now + 2.2; f.text = stickyText; f.good = false; publish(f); return
             }
+            if samples.isEmpty { neutral = angles }
             samples.append(vector); previousPose = f.pose; previousYaw = yaw; previousPitch = pitch
             stability.reset(); pauseUntil = now + 0.45; deadline = now + (profile == nil ? 180 : 90)
             capturedAt = now; f.capturedAt = now; f.hold = 0; f.accepted = samples.count; f.flash = true; f.text = "¡Captura lista!"; publish(f); beep()
@@ -201,9 +223,9 @@ final class FaceCapture: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
             }
         }
         guard count > 0 else { return "Centra el rostro." }
-        if sum / Double(count) < 55 { return "Busca más luz de frente." }
-        if sum / Double(count) > 225 { return "Evita luz demasiado intensa." }
-        if gradient / Double(count) < 1.8 { return "Limpia la cámara y mantente quieto." }
+        if sum / Double(count) < 45 { return "Busca más luz de frente." }
+        if sum / Double(count) > 235 { return "Evita luz demasiado intensa." }
+        if gradient / Double(count) < 1.2 { return "Limpia la cámara o busca un poco más de luz." }
         return nil
     }
     private func beep() {

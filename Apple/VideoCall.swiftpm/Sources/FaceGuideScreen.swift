@@ -68,20 +68,21 @@ struct FaceCameraView: View {
             Text(feedback.text).font(.subheadline.weight(.medium))
                 .foregroundStyle(feedback.fatal ? .orange : feedback.good ? faceMint : .white.opacity(0.8))
                 .multilineTextAlignment(.center).frame(minHeight: 40)
-            HStack(spacing: 8) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 check("Centro", good: feedback.centered)
                 check("Distancia", good: feedback.distance)
                 check("Imagen", good: feedback.imageGood)
+                check("Posición", good: feedback.poseGood)
             }
             VStack(spacing: 7) {
                 HStack {
-                    Text(feedback.good ? "Capturando…" : "Encuadre")
+                    Text(feedback.good ? "Captura automática…" : "Encuadre")
                     Spacer()
                     Text(feedback.good ? "Mantén un instante" : "\(feedback.score) / 100")
                 }.font(.caption.weight(.medium))
                 ProgressView(value: feedback.good ? feedback.hold : Double(feedback.score) / 100)
                     .tint(faceMint).animation(.linear(duration: 0.1), value: feedback.hold)
-                Text("Basta un giro pequeño, sin mostrar todo el perfil. No necesitas llegar a 100.")
+                Text("La foto se toma sola. No necesitas llenar el óvalo ni llegar a 100. Sigue las flechas con giros pequeños.")
                     .font(.caption).foregroundStyle(.white.opacity(0.5)).multilineTextAlignment(.center)
             }
             Button(action: capture.toggleMirror) {
